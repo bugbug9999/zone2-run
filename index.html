@@ -91,10 +91,16 @@
   .camring svg{width:100%;height:100%;transform:rotate(-90deg)}
   .camring .ct{fill:none;stroke:var(--surface2);stroke-width:8}
   .camring .cp{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .3s linear}
-  .camnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .camnum span{font-size:60px;font-weight:800;letter-spacing:-.02em;line-height:1}
-  .camnum small{color:var(--mid);font-weight:700;font-size:12px;letter-spacing:.14em;margin-top:4px}
-  #camVid,#camCv{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px}
+  .camprev{position:absolute;top:50%;left:50%;width:152px;height:152px;transform:translate(-50%,-50%);border-radius:50%;object-fit:cover;background:#0b0e14;z-index:1}
+  .camnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;pointer-events:none}
+  .camnum span{font-size:56px;font-weight:800;letter-spacing:-.02em;line-height:1;text-shadow:0 2px 12px rgba(0,0,0,.9)}
+  .camnum small{color:#cfd4dd;font-weight:700;font-size:12px;letter-spacing:.14em;margin-top:4px;text-shadow:0 1px 8px rgba(0,0,0,.9)}
+  .camqual{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;font-size:14px;font-weight:800;color:var(--mid)}
+  .camqual .dot{width:11px;height:11px;border-radius:50%;background:var(--low);transition:background .3s}
+  .camqual.q-bad{color:var(--fast)} .camqual.q-bad .dot{background:var(--fast)}
+  .camqual.q-mid{color:var(--slow)} .camqual.q-mid .dot{background:var(--slow)}
+  .camqual.q-good{color:var(--zone)} .camqual.q-good .dot{background:var(--zone)}
+  #camCv{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px}
   canvas.wave{width:100%;height:70px;margin-top:14px;display:block}
   .camlight{position:fixed;top:0;left:0;right:0;height:0;overflow:hidden;background:#fff;transition:height .25s;z-index:1;max-width:460px;margin:0 auto;pointer-events:none}
   .camlight.on{height:120px}
@@ -152,11 +158,12 @@
     <div class="camstage">
       <div class="camring">
         <svg viewBox="0 0 120 120"><circle class="ct" cx="60" cy="60" r="54"/><circle class="cp" id="camProg" cx="60" cy="60" r="54"/></svg>
+        <video id="camVid" class="camprev" playsinline autoplay muted></video>
         <div class="camnum"><span id="camBpm">–</span><small>BPM</small></div>
       </div>
     </div>
+    <div class="camqual" id="camQual"><span class="dot"></span><span id="camQualT">준비됨</span></div>
     <canvas id="camWave" class="wave" height="70"></canvas>
-    <video id="camVid" playsinline autoplay muted></video>
     <canvas id="camCv" width="60" height="60"></canvas>
     <div class="dock stack">
       <button class="btn" id="camAct" onclick="camPrimary()">측정 시작</button>
@@ -531,10 +538,11 @@
   var cam={stream:null,track:null,raf:null,samples:[],running:false,t0:0,dur:22000,lastBpm:0};
   window.openCam=function(){resetCam();show('cam');};
   function resetCam(){
-    cam.samples=[];cam.running=false;cam.lastBpm=0;
+    cam.samples=[];cam.running=false;cam.lastBpm=0;cam.hist=[];
     $('camBpm').textContent='–';$('camProg').style.strokeDashoffset=339;
     $('camHint').textContent='준비되면 시작을 누르세요';
     $('camSub').textContent='앞카메라 렌즈에 손끝을 가볍게 대고, 폰 밝기를 최대로';
+    setQual('','준비됨');
     var a=$('camAct');a.textContent='측정 시작';a.disabled=false;a.dataset.done='';
     var wc=$('camWave');try{wc.getContext('2d').clearRect(0,0,wc.width||400,wc.height)}catch(e){}
   }
@@ -562,9 +570,9 @@
     }).catch(function(){camFail('카메라 권한이 필요해요. 아트팩트 안에선 막혀요 — 배포된 링크를 새 탭에서 열거나 탭 측정을 쓰세요');});
   }
   function beginCapture(st,track,torch){
-    cam.stream=st;cam.track=track;
+    cam.stream=st;cam.track=track;cam.torch=torch;
     var vid=$('camVid');vid.srcObject=st;var pp=vid.play&&vid.play();if(pp&&pp.catch)pp.catch(function(){});
-    cam.running=true;cam.t0=Date.now();cam.samples=[];
+    cam.running=true;cam.t0=Date.now();cam.samples=[];cam.hist=[];
     $('camHint').textContent='손끝을 렌즈에 대고 가만히';
     $('camSub').textContent=torch?'후면 플래시로 측정 중':'앞카메라+화면빛 · 폰 밝기를 최대로';
     $('camAct').textContent='측정 중…';$('camAct').disabled=true;
@@ -575,20 +583,37 @@
     var vid=$('camVid'),cv=$('camCv'),c=cv.getContext('2d');
     if(vid.videoWidth){
       c.drawImage(vid,0,0,cv.width,cv.height);
-      var d=c.getImageData(0,0,cv.width,cv.height).data,r=0,br=0,n=cv.width*cv.height;
-      for(var i=0;i<d.length;i+=4){r+=d[i];br+=d[i]+d[i+1]+d[i+2];}
-      cam.samples.push({t:Date.now()-cam.t0,v:r/n});
-      updateCam(br/(n*3));drawWave();
+      var d=c.getImageData(0,0,cv.width,cv.height).data,r=0,g=0,b=0,n=cv.width*cv.height;
+      for(var i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];}
+      r/=n;g/=n;b/=n;
+      cam.samples.push({t:Date.now()-cam.t0,v:r});
+      updateCam((r+g+b)/3,r,g,b);drawWave();
     }
     cam.raf=requestAnimationFrame(loopCam);
   }
-  function updateCam(meanBr){
+  function setQual(cls,txt){$('camQual').className='camqual '+cls;$('camQualT').textContent=txt;}
+  function updateCam(meanBr,r,g,b){
     var el=Date.now()-cam.t0;
     $('camProg').style.strokeDashoffset=339*(1-Math.min(1,el/cam.dur));
-    if(meanBr>210)$('camHint').textContent='렌즈를 손끝으로 완전히 덮어주세요';
-    else $('camHint').textContent='측정 중… 가만히 유지';
-    if(el>5000){var rec=cam.samples.filter(function(s){return s.t>el-12000});var b=bpmAuto(rec);if(b&&b>=40&&b<=180){cam.lastBpm=b;$('camBpm').textContent=b;}}
-    if(el>=cam.dur)finishCam();
+    if(el>=cam.dur){ finishCam(); return; }
+    // 1) 커버 상태 (밝기로 판정) — 가까이/멀리 안내
+    if(meanBr>185){ setQual('q-bad','렌즈가 덜 덮였어요'); $('camHint').textContent='손끝을 렌즈에 더 붙이세요'; return; }
+    if(meanBr<9){ setQual('q-bad','너무 어두워요'); $('camHint').textContent=cam.torch?'손끝 힘을 살짝 빼세요':'손끝 힘 빼고 폰 밝기 올려요'; return; }
+    // 2) 붉기 체크 (혈류 신호는 붉어야 함) — 전면+화면빛에선 참고용
+    var reddish = r>g && r>b;
+    // 3) 신호 강도 + BPM 일관성
+    var strong=false, bpm=null;
+    if(el>3200){
+      bpm=bpmAuto(cam.samples.filter(function(s){return s.t>el-10000}));
+      var rec=cam.samples.filter(function(s){return s.t>el-4000}).map(function(s){return s.v});
+      if(rec.length>10){var mn=Math.min.apply(0,rec),mx=Math.max.apply(0,rec),mean=rec.reduce(function(a,x){return a+x},0)/rec.length;var ac=mean?(mx-mn)/mean*100:0;strong=ac>0.2&&ac<18;}
+    }
+    if(bpm&&bpm>=40&&bpm<=180){cam.lastBpm=bpm;cam.hist=(cam.hist||[]).concat(bpm).slice(-5);$('camBpm').textContent=bpm;}
+    var consistent=cam.hist&&cam.hist.length>=3&&(Math.max.apply(0,cam.hist)-Math.min.apply(0,cam.hist))<=8;
+    if(consistent){ setQual('q-good','맥박 잘 잡혀요 ✓'); $('camHint').textContent='좋아요, 그대로 가만히'; }
+    else if(strong||bpm){ setQual('q-mid','신호 잡는 중…'); $('camHint').textContent='손끝 대고 가만히 기다려요'; }
+    else if(el<3200){ setQual('q-mid','신호 잡는 중…'); $('camHint').textContent='손끝을 렌즈에 대고 가만히'; }
+    else { setQual('q-bad', reddish?'신호 약해요':'손끝 위치 조정'); $('camHint').textContent='손끝을 살짝 움직여 위치를 맞춰요'; }
   }
   function finishCam(){
     cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);
