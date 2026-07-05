@@ -103,7 +103,8 @@
   #camCv{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px}
   canvas.wave{width:100%;height:70px;margin-top:14px;display:block}
   .camlight{position:fixed;top:0;left:0;right:0;height:0;overflow:hidden;background:#fff;transition:height .25s;z-index:1;max-width:460px;margin:0 auto;pointer-events:none}
-  .camlight.on{height:120px}
+  .camlight.on{height:190px}
+  .camdiag{text-align:center;margin-top:8px;font-size:12px;color:var(--low);font-variant-numeric:tabular-nums;min-height:16px;font-family:ui-monospace,Menlo,monospace}
 </style>
 
 <div class="app">
@@ -163,6 +164,7 @@
       </div>
     </div>
     <div class="camqual" id="camQual"><span class="dot"></span><span id="camQualT">준비됨</span></div>
+    <div class="camdiag" id="camDiag"></div>
     <canvas id="camWave" class="wave" height="70"></canvas>
     <canvas id="camCv" width="60" height="60"></canvas>
     <div class="dock stack">
@@ -547,7 +549,7 @@
     $('camBpm').textContent='–';$('camProg').style.strokeDashoffset=339;
     $('camHint').textContent='준비되면 시작을 누르세요';
     $('camSub').textContent='앞카메라 렌즈에 손끝을 가볍게 대고, 폰 밝기를 최대로';
-    setQual('','준비됨');
+    setQual('','준비됨');$('camDiag').textContent='';
     var a=$('camAct');a.textContent='측정 시작';a.disabled=false;a.dataset.done='';
     var wc=$('camWave');try{wc.getContext('2d').clearRect(0,0,wc.width||400,wc.height)}catch(e){}
   }
@@ -560,7 +562,10 @@
   function startCam(){
     if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){camFail('이 브라우저는 카메라를 지원하지 않아요');return;}
     $('camHint').textContent='카메라 켜는 중…';$('camAct').disabled=true;
-    // 1) 후면+플래시 시도 (안드로이드). 플래시 안 되면 후면 버리고 전면+화면빛(아이폰)
+    var isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    // iOS: 플래시 불가 + 후면 트리플카메라가 자동 렌즈전환하며 초점 헤맴 → 곧장 앞카메라+화면빛
+    if(isiOS){ useFront(); return; }
+    // Android 등: 후면+플래시 시도, 플래시 안 되면 앞카메라
     navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}}).then(function(st){
       var track=st.getVideoTracks()[0],torch=false;
       try{var caps=track.getCapabilities&&track.getCapabilities();if(caps&&caps.torch){track.applyConstraints({advanced:[{torch:true}]});torch=true;}}catch(e){}
@@ -604,15 +609,17 @@
   function updateCam(meanBr,r,g,b){
     var now=Date.now(), el=now-cam.t0, dt=cam.lastTs?(now-cam.lastTs):0; cam.lastTs=now;
     if(dt>500)dt=0; // 탭 전환 등으로 튄 델타 무시
+    // 실시간 진단(디버그용): 지금 카메라가 읽는 색/밝기
+    $('camDiag').textContent='R'+Math.round(r)+' G'+Math.round(g)+' B'+Math.round(b)+' · 밝기'+Math.round(meanBr)+' · R/G'+(g?(r/g).toFixed(2):'-');
     // 안전 상한: 너무 오래 끌면 종료(안정 신호 있으면 채택, 없으면 실패)
     if(el>=cam.maxMs){
       if(cam.hist&&cam.hist.length>=3&&spread(cam.hist)<=10)lockCam();
       else camFail('신호가 약했어요. 손끝을 렌즈에 완전히 밀착해 다시, 또는 탭 측정');
       return;
     }
-    // 1) 커버 판정: 손끝+빛 통과는 "빨강 강우세 + 적당한 밝기". 빈 화면·얼굴·밝은 장면 배제
-    var reddish = r>g*1.5 && r>b*1.5 && r>40;
-    var covered = reddish && meanBr>=9 && meanBr<=205;
+    // 1) 커버 판정: 손끝+빛 통과는 "빨강 우세". 빈 화면(R≈G≈B)·얼굴은 배제. 앞카메라 신호는 덜 붉어서 1.25배로 완화
+    var reddish = r>g*1.25 && r>b*1.2 && r>35;
+    var covered = reddish && meanBr>=8 && meanBr<=230;
     if(!covered){
       cam.goodMs=Math.max(0,cam.goodMs-dt*2);          // 손가락 없으면 빠르게 되돌림, 절대 완료 안 함
       cam.hist=[];                                     // 접촉 끊기면 이력 비움(다시 안정화 요구)
