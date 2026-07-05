@@ -363,9 +363,9 @@
 
   function maybePrompt(){
     if(run.promptOpen)return;
-    var gap = run.secTot - (run._lastPromptSec||0);  // 마지막 프롬프트 이후 경과(초)
-    if(gap<120)return;                                // 최소 2분 간격
-    if(run.curR>0.66 || gap>=240){ askTalk(false); }  // 임계 부근이거나 4분 경과
+    var gap = run.secTot - (run._lastPromptSec||0);   // 마지막 프롬프트 이후 경과(초)
+    if(gap<120)return;                                 // 최소 2분 간격
+    if(run.curR>0.73 || gap>=300){ askTalk(false); }   // 존2 위로 드리프트(73%↑) 또는 5분 경과
   }
 
   window.askTalk=function(manual){
@@ -378,17 +378,21 @@
   window.answerTalk=function(resp){
     if(!run)return;
     run.checks++;
-    var before=P.vo2max, r=run.pace?intensity(run.pace,run.grade,P.vo2max):ZHI;
-    if(resp==='easy'){ P.vo2max *= (r>0.66?1.04:1.01); }
-    else if(resp==='hard'){ P.vo2max *= 0.95; }
-    else { P.vo2max *= 1.00; }
-    P.vo2max=Math.max(15,Math.min(75,P.vo2max));
+    var slowBefore=bandFor(0,P.vo2max).slow;
+    if(run.pace){
+      // 답이 가리키는 목표강도로 개인 VO2max를 부드럽게 끌어당김(모든 답이 정보. 중간=존2 상단=임계)
+      var spd=1000/(run.pace/60), g=gradeEff(run.grade/100);
+      var vo2P=0.2*spd+0.9*spd*g+VO2REST;
+      var tgt = resp==='hard'?0.80 : resp==='easy'?0.58 : 0.70;
+      var Vneed=VO2REST+(vo2P-VO2REST)/tgt;
+      P.vo2max=Math.max(15,Math.min(75, P.vo2max*0.66 + Vneed*0.34));
+    }
     run.promptLog=run.promptLog||[];run.promptLog.push({t:run.secTot,paceS:run.pace,resp:resp});
     save();updateBandUI();
     $('overlay').classList.remove('on');run.promptOpen=false;
-    var b=bandFor(0,P.vo2max);
-    var msg = resp==='hard' ? '알겠어, 목표를 조금 늦출게 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
-            : resp==='easy' ? '아직 여유 있네, 목표 페이스 조정 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
+    var b=bandFor(0,P.vo2max), d=b.slow-slowBefore;
+    var msg = d>4 ? '알겠어, 목표를 조금 늦출게 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
+            : d<-4 ? '여유 있네, 목표 페이스 조정 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
             : '딱 좋아, 그대로 유지';
     toast(msg);
     $('rChecks').textContent=run.checks;
