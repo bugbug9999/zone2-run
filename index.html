@@ -105,6 +105,18 @@
   .camlight{position:fixed;top:0;left:0;right:0;height:0;overflow:hidden;background:#fff;transition:height .25s;z-index:1;max-width:460px;margin:0 auto;pointer-events:none}
   .camlight.on{height:190px}
   .camdiag{text-align:center;margin-top:8px;font-size:12px;color:var(--low);font-variant-numeric:tabular-nums;min-height:16px;font-family:ui-monospace,Menlo,monospace}
+  /* 앞카메라 측정 시 화면 전체가 광원(플래시) — 흰 배경 + 검은 UI */
+  #s-cam.lit{background:#ffffff}
+  #s-cam.lit .eyebrow{color:#4a52c0}
+  #s-cam.lit h2{color:#111418}
+  #s-cam.lit .camsub,#s-cam.lit .small,#s-cam.lit .muted{color:#475063}
+  #s-cam.lit .camring .ct{stroke:#dfe2e9}
+  #s-cam.lit .camnum span{color:#111418;text-shadow:none}
+  #s-cam.lit .camnum small{color:#475063;text-shadow:none}
+  #s-cam.lit .camdiag{color:#6b7280}
+  #s-cam.lit .back{background:#fff;border-color:#d0d3da;color:#333}
+  #s-cam.lit .dock{background:linear-gradient(to top,#fff 62%,transparent)}
+  #s-cam.lit .btn.ghost{color:#111418;border-color:#d0d3da}
 </style>
 
 <div class="app">
@@ -575,7 +587,7 @@
   }
   function useFront(){
     navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}).then(function(st){
-      $('camLight').classList.add('on');
+      $('s-cam').classList.add('lit');
       beginCapture(st,st.getVideoTracks()[0],false);
     }).catch(function(){camFail('카메라 권한이 필요해요. 아트팩트 안에선 막혀요 — 배포된 링크를 새 탭에서 열거나 탭 측정을 쓰세요');});
   }
@@ -583,8 +595,8 @@
     cam.stream=st;cam.track=track;cam.torch=torch;
     var vid=$('camVid');vid.srcObject=st;var pp=vid.play&&vid.play();if(pp&&pp.catch)pp.catch(function(){});
     cam.running=true;cam.t0=Date.now();cam.samples=[];cam.hist=[];cam.goodMs=0;cam.lastTs=0;
-    $('camHint').textContent='손끝을 렌즈에 대고 가만히';
-    $('camSub').textContent=torch?'후면 플래시 · 잘 잡히면 자동 완료':'앞카메라+화면빛 · 잘 잡히면 자동 완료';
+    $('camHint').textContent=torch?'손끝을 후면 렌즈에 대고 가만히':'위쪽 앞카메라에 손끝을 대세요';
+    $('camSub').textContent=torch?'후면 플래시 · 잘 잡히면 자동 완료':'하얀 화면이 플래시예요 · 손끝으로 앞카메라를 덮으면 붉게 변해요';
     $('camAct').textContent='측정 중…';$('camAct').disabled=true;
     loopCam();
   }
@@ -648,7 +660,7 @@
   }
   function lockCam(){
     cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);
-    var bpm=median(cam.hist)||cam.lastBpm; stopStream();$('camLight').classList.remove('on');
+    var bpm=median(cam.hist)||cam.lastBpm; stopStream();$('s-cam').classList.remove('lit');
     if(!bpm||bpm<40||bpm>180){camFail('신호가 약했어요. 다시 시도하거나 탭 측정');return;}
     $('camProg').style.strokeDashoffset=0;
     $('camBpm').textContent=bpm;$('camHint').textContent='측정 완료';$('camSub').textContent='이 값을 안정시심박으로 쓸까요?';
@@ -656,11 +668,11 @@
     var a=$('camAct');a.textContent='이 값 쓰기 ('+bpm+')';a.disabled=false;a.dataset.done='1';a.dataset.bpm=bpm;
   }
   function camFail(msg){
-    cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);stopStream();$('camLight').classList.remove('on');
+    cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);stopStream();$('s-cam').classList.remove('lit');
     $('camHint').textContent=msg;var a=$('camAct');a.textContent='다시 시도';a.disabled=false;a.dataset.done='';
   }
   function stopStream(){if(cam.stream){cam.stream.getTracks().forEach(function(t){try{t.stop()}catch(e){}});cam.stream=null;}}
-  window.stopCam=function(){cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);stopStream();$('camLight').classList.remove('on');};
+  window.stopCam=function(){cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);stopStream();$('s-cam').classList.remove('lit');};
   function drawWave(){
     var wc=$('camWave');if(!wc.width)wc.width=wc.clientWidth||400;
     var c=wc.getContext('2d'),W=wc.width,H=wc.height;c.clearRect(0,0,W,H);
