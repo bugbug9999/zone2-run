@@ -513,7 +513,7 @@
   };
 
   // ---------- camera PPG ----------
-  // 자기상관 기반 BPM (node에서 45~150bpm 17/17 검증)
+  // 정규화 자기상관 + 첫 유의미피크(옥타브 방어). node에서 랜덤노이즈 30/30, 이중봉우리 포함
   function bpmAuto(s){
     if(!s||s.length<40)return null;
     var t0=s[0].t,t1=s[s.length-1].t,dur=(t1-t0)/1000;
@@ -521,18 +521,23 @@
     var fs=25,N=Math.floor(dur*fs);
     var v=new Array(N),j=0;
     for(var i=0;i<N;i++){var t=t0+i/fs*1000;while(j<s.length-2&&s[j+1].t<t)j++;var a=s[j],b=s[j+1]||s[j];var f=(b.t-a.t)?(t-a.t)/(b.t-a.t):0;v[i]=a.v+(b.v-a.v)*f;}
+    // 프리스무딩(5탭) — 고주파 노이즈/에일리어싱 억제
+    var sm=new Array(N);for(var i=0;i<N;i++){var s0=0,c=0;for(var k=Math.max(0,i-2);k<=Math.min(N-1,i+2);k++){s0+=v[k];c++;}sm[i]=s0/c;}v=sm;
+    // 저주파 baseline 제거(±1.5s)
     var w=Math.round(fs*1.5),base=new Array(N);
     for(var i=0;i<N;i++){var s0=0,c=0;for(var k=Math.max(0,i-w);k<=Math.min(N-1,i+w);k++){s0+=v[k];c++;}base[i]=s0/c;}
     for(var i=0;i<N;i++)v[i]-=base[i];
     var mean=0;for(var i=0;i<N;i++)mean+=v[i];mean/=N;for(var i=0;i<N;i++)v[i]-=mean;
-    var lagMin=Math.floor(fs*60/180),lagMax=Math.ceil(fs*60/40),corr=[],gmax=-1e9;
-    for(var lag=lagMin;lag<=lagMax;lag++){var c=0;for(var i=0;i+lag<N;i++)c+=v[i]*v[i+lag];corr[lag]=c;if(c>gmax)gmax=c;}
-    if(gmax<=0)return null;
-    var bestLag=-1;
-    for(var lag=lagMin+1;lag<=lagMax-1;lag++){if(corr[lag]>=corr[lag-1]&&corr[lag]>=corr[lag+1]&&corr[lag]>=0.7*gmax){bestLag=lag;break;}}
-    if(bestLag<0){var g=-1e9;for(var lag=lagMin;lag<=lagMax;lag++)if(corr[lag]>g){g=corr[lag];bestLag=lag;}}
+    var energy=0;for(var i=0;i<N;i++)energy+=v[i]*v[i];if(energy<=0)return null;
+    var lagMin=Math.floor(fs*60/180),lagMax=Math.ceil(fs*60/40),corr=[];
+    for(var lag=lagMin;lag<=lagMax;lag++){var cc=0;for(var i=0;i+lag<N;i++)cc+=v[i]*v[i+lag];corr[lag]=cc/energy;}
+    // threshold 넘는 첫 로컬피크 = 기본주기(배수에 안 걸림). 없으면 낮은 floor로 재탐색, 그래도 없으면 null
+    function firstPeak(th){for(var L=lagMin+1;L<lagMax;L++){if(corr[L]>=corr[L-1]&&corr[L]>corr[L+1]&&corr[L]>=th)return L;}return -1;}
+    var bestLag=firstPeak(0.25);
+    if(bestLag<0)bestLag=firstPeak(0.14);
+    if(bestLag<0)return null;
     var cl=corr[bestLag-1]||corr[bestLag],cr=corr[bestLag+1]||corr[bestLag],cc=corr[bestLag];
-    var denom=(cl-2*cc+cr),d=denom?0.5*(cl-cr)/denom:0;
+    var den=(cl-2*cc+cr),d=den?0.5*(cl-cr)/den:0;
     return Math.round(60*fs/(bestLag+d));
   }
   var cam={stream:null,track:null,raf:null,samples:[],running:false,t0:0,dur:22000,lastBpm:0};
