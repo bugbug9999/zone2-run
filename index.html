@@ -610,10 +610,17 @@
       else camFail('신호가 약했어요. 손끝을 렌즈에 완전히 밀착해 다시, 또는 탭 측정');
       return;
     }
-    // 1) 커버 상태 — 가까이/멀리·힘 안내 (진행 안 함)
-    if(meanBr>185){ setQual('q-bad','너무 멀어요'); $('camHint').textContent='손끝을 렌즈에 완전히 대세요'; drawProg(); return; }
-    if(meanBr<9){ setQual('q-bad','너무 눌렸어요'); $('camHint').textContent=cam.torch?'손끝 힘을 살짝 빼세요':'손끝 힘 빼고 폰 밝기 올려요'; drawProg(); return; }
-    // 2) 신호/일관성 판정
+    // 1) 커버 판정: 손끝+빛 통과는 "빨강 강우세 + 적당한 밝기". 빈 화면·얼굴·밝은 장면 배제
+    var reddish = r>g*1.5 && r>b*1.5 && r>40;
+    var covered = reddish && meanBr>=9 && meanBr<=205;
+    if(!covered){
+      cam.goodMs=Math.max(0,cam.goodMs-dt*2);          // 손가락 없으면 빠르게 되돌림, 절대 완료 안 함
+      cam.hist=[];                                     // 접촉 끊기면 이력 비움(다시 안정화 요구)
+      if(meanBr<9){ setQual('q-bad','너무 눌렸어요'); $('camHint').textContent=cam.torch?'손끝 힘을 살짝 빼세요':'손끝 힘 빼고 폰 밝기 올려요'; }
+      else { setQual('q-bad','손끝이 안 보여요'); $('camHint').textContent='카메라를 손끝으로 완전히 덮어주세요'; }
+      drawProg(); return;
+    }
+    // 2) (접촉 확인됨) 신호/일관성 판정
     var bpm=null;
     if(el>3000)bpm=bpmAuto(cam.samples.filter(function(s){return s.t>el-9000}));
     if(bpm&&bpm>=40&&bpm<=180){cam.lastBpm=bpm;cam.hist=(cam.hist||[]).concat(bpm).slice(-6);$('camBpm').textContent=bpm;}
@@ -621,6 +628,7 @@
     if(consistent){
       cam.goodMs+=dt;                       // 안정 신호일 때만 진행
       setQual('q-good','맥박 잡혀요 ✓'); $('camHint').textContent='좋아요, 그대로 가만히 유지';
+      if(cam.goodMs>=cam.needMs){ drawProg(); lockCam(); return; }  // 완료는 오직 접촉+안정 프레임에서만
     } else if(bpm){
       cam.goodMs+=dt*0.15;                  // 감지되나 아직 불안정 — 아주 조금
       setQual('q-mid','신호 안정화 중…'); $('camHint').textContent='손끝 대고 가만히 기다려요';
@@ -630,7 +638,6 @@
       $('camHint').textContent = el<7000?'손끝을 렌즈에 대고 가만히':'손끝 위치를 살짝 조정하세요';
     }
     drawProg();
-    if(cam.goodMs>=cam.needMs)lockCam();     // 충분히 안정되면 자동 완료
   }
   function lockCam(){
     cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);
