@@ -540,10 +540,10 @@
     var den=(cl-2*cc+cr),d=den?0.5*(cl-cr)/den:0;
     return Math.round(60*fs/(bestLag+d));
   }
-  var cam={stream:null,track:null,raf:null,samples:[],running:false,t0:0,dur:22000,lastBpm:0};
+  var cam={stream:null,track:null,raf:null,samples:[],running:false,t0:0,lastBpm:0,goodMs:0,lastTs:0,needMs:6000,maxMs:45000};
   window.openCam=function(){resetCam();show('cam');};
   function resetCam(){
-    cam.samples=[];cam.running=false;cam.lastBpm=0;cam.hist=[];
+    cam.samples=[];cam.running=false;cam.lastBpm=0;cam.hist=[];cam.goodMs=0;cam.lastTs=0;
     $('camBpm').textContent='–';$('camProg').style.strokeDashoffset=339;
     $('camHint').textContent='준비되면 시작을 누르세요';
     $('camSub').textContent='앞카메라 렌즈에 손끝을 가볍게 대고, 폰 밝기를 최대로';
@@ -577,9 +577,9 @@
   function beginCapture(st,track,torch){
     cam.stream=st;cam.track=track;cam.torch=torch;
     var vid=$('camVid');vid.srcObject=st;var pp=vid.play&&vid.play();if(pp&&pp.catch)pp.catch(function(){});
-    cam.running=true;cam.t0=Date.now();cam.samples=[];cam.hist=[];
+    cam.running=true;cam.t0=Date.now();cam.samples=[];cam.hist=[];cam.goodMs=0;cam.lastTs=0;
     $('camHint').textContent='손끝을 렌즈에 대고 가만히';
-    $('camSub').textContent=torch?'후면 플래시로 측정 중':'앞카메라+화면빛 · 폰 밝기를 최대로';
+    $('camSub').textContent=torch?'후면 플래시 · 잘 잡히면 자동 완료':'앞카메라+화면빛 · 잘 잡히면 자동 완료';
     $('camAct').textContent='측정 중…';$('camAct').disabled=true;
     loopCam();
   }
@@ -597,35 +597,48 @@
     cam.raf=requestAnimationFrame(loopCam);
   }
   function setQual(cls,txt){$('camQual').className='camqual '+cls;$('camQualT').textContent=txt;}
+  function spread(a){return Math.max.apply(0,a)-Math.min.apply(0,a);}
+  function median(a){if(!a||!a.length)return null;var b=a.slice().sort(function(x,y){return x-y});return b[Math.floor(b.length/2)];}
+  function drawProg(){$('camProg').style.strokeDashoffset=339*(1-Math.min(1,cam.goodMs/cam.needMs));}
+  // 시간이 아니라 "안정 신호가 쌓인 정도"로 진행. 안 잡히면 진행 안 하고 코칭만.
   function updateCam(meanBr,r,g,b){
-    var el=Date.now()-cam.t0;
-    $('camProg').style.strokeDashoffset=339*(1-Math.min(1,el/cam.dur));
-    if(el>=cam.dur){ finishCam(); return; }
-    // 1) 커버 상태 (밝기로 판정) — 가까이/멀리 안내
-    if(meanBr>185){ setQual('q-bad','렌즈가 덜 덮였어요'); $('camHint').textContent='손끝을 렌즈에 더 붙이세요'; return; }
-    if(meanBr<9){ setQual('q-bad','너무 어두워요'); $('camHint').textContent=cam.torch?'손끝 힘을 살짝 빼세요':'손끝 힘 빼고 폰 밝기 올려요'; return; }
-    // 2) 붉기 체크 (혈류 신호는 붉어야 함) — 전면+화면빛에선 참고용
-    var reddish = r>g && r>b;
-    // 3) 신호 강도 + BPM 일관성
-    var strong=false, bpm=null;
-    if(el>3200){
-      bpm=bpmAuto(cam.samples.filter(function(s){return s.t>el-10000}));
-      var rec=cam.samples.filter(function(s){return s.t>el-4000}).map(function(s){return s.v});
-      if(rec.length>10){var mn=Math.min.apply(0,rec),mx=Math.max.apply(0,rec),mean=rec.reduce(function(a,x){return a+x},0)/rec.length;var ac=mean?(mx-mn)/mean*100:0;strong=ac>0.2&&ac<18;}
+    var now=Date.now(), el=now-cam.t0, dt=cam.lastTs?(now-cam.lastTs):0; cam.lastTs=now;
+    if(dt>500)dt=0; // 탭 전환 등으로 튄 델타 무시
+    // 안전 상한: 너무 오래 끌면 종료(안정 신호 있으면 채택, 없으면 실패)
+    if(el>=cam.maxMs){
+      if(cam.hist&&cam.hist.length>=3&&spread(cam.hist)<=10)lockCam();
+      else camFail('신호가 약했어요. 손끝을 렌즈에 완전히 밀착해 다시, 또는 탭 측정');
+      return;
     }
-    if(bpm&&bpm>=40&&bpm<=180){cam.lastBpm=bpm;cam.hist=(cam.hist||[]).concat(bpm).slice(-5);$('camBpm').textContent=bpm;}
-    var consistent=cam.hist&&cam.hist.length>=3&&(Math.max.apply(0,cam.hist)-Math.min.apply(0,cam.hist))<=8;
-    if(consistent){ setQual('q-good','맥박 잘 잡혀요 ✓'); $('camHint').textContent='좋아요, 그대로 가만히'; }
-    else if(strong||bpm){ setQual('q-mid','신호 잡는 중…'); $('camHint').textContent='손끝 대고 가만히 기다려요'; }
-    else if(el<3200){ setQual('q-mid','신호 잡는 중…'); $('camHint').textContent='손끝을 렌즈에 대고 가만히'; }
-    else { setQual('q-bad', reddish?'신호 약해요':'손끝 위치 조정'); $('camHint').textContent='손끝을 살짝 움직여 위치를 맞춰요'; }
+    // 1) 커버 상태 — 가까이/멀리·힘 안내 (진행 안 함)
+    if(meanBr>185){ setQual('q-bad','너무 멀어요'); $('camHint').textContent='손끝을 렌즈에 완전히 대세요'; drawProg(); return; }
+    if(meanBr<9){ setQual('q-bad','너무 눌렸어요'); $('camHint').textContent=cam.torch?'손끝 힘을 살짝 빼세요':'손끝 힘 빼고 폰 밝기 올려요'; drawProg(); return; }
+    // 2) 신호/일관성 판정
+    var bpm=null;
+    if(el>3000)bpm=bpmAuto(cam.samples.filter(function(s){return s.t>el-9000}));
+    if(bpm&&bpm>=40&&bpm<=180){cam.lastBpm=bpm;cam.hist=(cam.hist||[]).concat(bpm).slice(-6);$('camBpm').textContent=bpm;}
+    var consistent=cam.hist&&cam.hist.length>=3&&spread(cam.hist)<=8;
+    if(consistent){
+      cam.goodMs+=dt;                       // 안정 신호일 때만 진행
+      setQual('q-good','맥박 잡혀요 ✓'); $('camHint').textContent='좋아요, 그대로 가만히 유지';
+    } else if(bpm){
+      cam.goodMs+=dt*0.15;                  // 감지되나 아직 불안정 — 아주 조금
+      setQual('q-mid','신호 안정화 중…'); $('camHint').textContent='손끝 대고 가만히 기다려요';
+    } else {
+      cam.goodMs=Math.max(0,cam.goodMs-dt*0.25); // 신호 없으면 살짝 되돌림
+      setQual('q-mid', el<7000?'신호 잡는 중…':'신호 약해요');
+      $('camHint').textContent = el<7000?'손끝을 렌즈에 대고 가만히':'손끝 위치를 살짝 조정하세요';
+    }
+    drawProg();
+    if(cam.goodMs>=cam.needMs)lockCam();     // 충분히 안정되면 자동 완료
   }
-  function finishCam(){
+  function lockCam(){
     cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);
-    var el=Date.now()-cam.t0,rec=cam.samples.filter(function(s){return s.t>el-15000});
-    var bpm=bpmAuto(rec)||cam.lastBpm;stopStream();$('camLight').classList.remove('on');
-    if(!bpm||bpm<40||bpm>180){camFail('신호가 약해요. 손끝을 렌즈에 더 밀착해 다시, 또는 탭 측정');return;}
+    var bpm=median(cam.hist)||cam.lastBpm; stopStream();$('camLight').classList.remove('on');
+    if(!bpm||bpm<40||bpm>180){camFail('신호가 약했어요. 다시 시도하거나 탭 측정');return;}
+    $('camProg').style.strokeDashoffset=0;
     $('camBpm').textContent=bpm;$('camHint').textContent='측정 완료';$('camSub').textContent='이 값을 안정시심박으로 쓸까요?';
+    setQual('q-good','완료 ✓');
     var a=$('camAct');a.textContent='이 값 쓰기 ('+bpm+')';a.disabled=false;a.dataset.done='1';a.dataset.bpm=bpm;
   }
   function camFail(msg){
