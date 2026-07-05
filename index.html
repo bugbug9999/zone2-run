@@ -11,36 +11,36 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
-  body{
-    background:var(--ground); color:var(--hi);
-    font-family:system-ui,-apple-system,"SF Pro Text",Segoe UI,Roboto,sans-serif;
-    -webkit-font-smoothing:antialiased; line-height:1.45;
-    font-variant-numeric:tabular-nums;
-  }
+  body{background:var(--ground);color:var(--hi);font-family:system-ui,-apple-system,"SF Pro Text",Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.45;font-variant-numeric:tabular-nums}
   .app{max-width:460px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;position:relative}
-  .screen{display:none;flex:1;flex-direction:column;padding:24px 20px 120px;animation:fade .28s ease}
+  .screen{display:none;flex:1;flex-direction:column;padding:24px 20px 130px;animation:fade .28s ease}
   .screen.active{display:flex}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){.screen{animation:none}}
 
   .eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
-  h1{font-size:30px;font-weight:800;letter-spacing:-.02em;text-wrap:balance;margin:10px 0 8px}
+  h1{font-size:29px;font-weight:800;letter-spacing:-.02em;text-wrap:balance;margin:10px 0 8px}
   h2{font-size:20px;font-weight:800;letter-spacing:-.01em;margin:0 0 4px}
   p.lead{color:var(--mid);font-size:15px;max-width:60ch}
   .muted{color:var(--mid)} .small{font-size:13px}
 
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
   .card+.card{margin-top:14px}
-  .stack{display:flex;flex-direction:column;gap:14px}
 
   label.field{display:block;margin-top:18px}
   label.field .l{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);display:flex;justify-content:space-between;align-items:baseline}
-  label.field .l b{color:var(--hi);font-size:22px;font-weight:800;letter-spacing:-.01em}
+  label.field .l b{color:var(--hi);font-size:20px;font-weight:800;letter-spacing:-.01em}
   input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;background:var(--surface2);margin-top:14px;outline:none}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--accent);border:3px solid var(--ground);box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer}
   input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--hi);outline-offset:2px}
-  input[type=number]{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--hi);font-size:26px;font-weight:800;padding:12px 14px;border-radius:12px;margin-top:10px;font-variant-numeric:tabular-nums}
+  .numrow{display:flex;gap:10px}
+  .numrow .field{flex:1;margin-top:18px}
+  input[type=number]{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--hi);font-size:22px;font-weight:800;padding:11px 12px;border-radius:12px;margin-top:8px;font-variant-numeric:tabular-nums}
   input[type=number]:focus{outline:2px solid var(--accent);border-color:transparent}
+
+  .seg{display:flex;gap:8px;margin-top:8px}
+  .seg button{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--mid);font-weight:800;font-size:15px;padding:11px;border-radius:12px;cursor:pointer}
+  .seg button.on{background:var(--accent);color:#0B0E14;border-color:transparent}
 
   .btn{display:block;width:100%;background:var(--accent);color:#0B0E14;font-size:16px;font-weight:800;border:none;border-radius:14px;padding:16px;cursor:pointer;letter-spacing:-.01em}
   .btn:active{transform:translateY(1px)}
@@ -48,27 +48,22 @@
   .btn.sm{padding:12px;font-size:14px;border-radius:12px}
   .btn:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
   .btnrow{display:flex;gap:10px}
-  .dock{position:fixed;bottom:0;left:0;right:0;padding:16px 20px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--ground) 62%,transparent);max-width:460px;margin:0 auto}
+  .dock{position:fixed;bottom:0;left:0;right:0;padding:16px 20px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--ground) 62%,transparent);max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
 
-  /* big metrics */
-  .hero{text-align:center;padding:8px 0}
+  .hero{text-align:center;padding:6px 0}
   .hero .k{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mid)}
-  .big{font-size:68px;font-weight:800;letter-spacing:-.03em;line-height:1;margin-top:4px}
-  .big .u{font-size:22px;font-weight:700;color:var(--mid);letter-spacing:0}
-  .subrow{display:flex;justify-content:center;gap:22px;margin-top:10px;color:var(--mid);font-size:14px}
-  .subrow b{color:var(--hi);font-weight:700}
+  .big{font-size:58px;font-weight:800;letter-spacing:-.03em;line-height:1;margin-top:4px}
+  .big .u{font-size:20px;font-weight:700;color:var(--mid);letter-spacing:0}
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .stat{background:var(--surface2);border-radius:14px;padding:14px}
   .stat .k{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mid)}
-  .stat .v{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+  .stat .v{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
   .stat .v small{font-size:13px;color:var(--mid);font-weight:600}
 
-  /* zone gauge */
-  .gauge{margin:10px 0 4px}
-  .gauge .bar{position:relative;height:16px;border-radius:10px;overflow:hidden;
-    background:linear-gradient(to right,var(--slow) 0%,var(--slow) 37.5%,var(--zone) 37.5%,var(--zone) 62.5%,var(--fast) 62.5%,var(--fast) 100%)}
-  .gauge .mk{position:absolute;top:-5px;width:4px;height:26px;background:#fff;border-radius:3px;box-shadow:0 0 0 2px rgba(0,0,0,.45);transition:left .4s ease}
+  .gauge{margin:14px 0 4px}
+  .gauge .bar{position:relative;height:16px;border-radius:10px;overflow:hidden;background:linear-gradient(to right,var(--slow) 0%,var(--slow) 37.5%,var(--zone) 37.5%,var(--zone) 62.5%,var(--fast) 62.5%,var(--fast) 100%)}
+  .gauge .mk{position:absolute;top:-5px;width:4px;height:26px;background:#fff;border-radius:3px;box-shadow:0 0 0 2px rgba(0,0,0,.45);transition:left .5s ease}
   @media (prefers-reduced-motion:reduce){.gauge .mk{transition:none}}
   .gauge .lbls{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid)}
 
@@ -78,45 +73,27 @@
   .is-slow{color:var(--slow)} .is-slow .dot{background:var(--slow)}
   .is-fast{color:var(--fast)} .is-fast .dot{background:var(--fast)}
 
-  .pill{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-dim);padding:4px 10px;border-radius:999px}
   .note{font-size:12.5px;color:var(--low);margin-top:14px;line-height:1.5}
   svg.route{width:100%;height:170px;background:var(--surface2);border-radius:14px;display:block}
   .center{text-align:center}
   .back{position:absolute;top:20px;left:16px;background:var(--surface2);border:1px solid var(--line);color:var(--mid);width:40px;height:40px;border-radius:12px;font-size:20px;cursor:pointer;z-index:5}
   a{color:var(--accent)}
-  .tapbtn{width:150px;height:150px;border-radius:50%;background:var(--accent);color:#0B0E14;border:6px solid var(--ground);box-shadow:0 0 0 2px var(--accent-dim);font-size:18px;font-weight:800;margin:8px auto;display:block;cursor:pointer}
-  .tapbtn:active{transform:scale(.96)}
-  .camstage{display:flex;justify-content:center;align-items:center;margin-top:26px;min-height:230px}
-  .camring{position:relative;width:220px;height:220px}
-  .camring svg{width:100%;height:100%;transform:rotate(-90deg)}
-  .camring .ct{fill:none;stroke:var(--surface2);stroke-width:8}
-  .camring .cp{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .3s linear}
-  .camprev{position:absolute;top:50%;left:50%;width:152px;height:152px;transform:translate(-50%,-50%);border-radius:50%;object-fit:cover;background:#0b0e14;z-index:1}
-  .camnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;pointer-events:none}
-  .camnum span{font-size:56px;font-weight:800;letter-spacing:-.02em;line-height:1;text-shadow:0 2px 12px rgba(0,0,0,.9)}
-  .camnum small{color:#cfd4dd;font-weight:700;font-size:12px;letter-spacing:.14em;margin-top:4px;text-shadow:0 1px 8px rgba(0,0,0,.9)}
-  .camqual{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;font-size:14px;font-weight:800;color:var(--mid)}
-  .camqual .dot{width:11px;height:11px;border-radius:50%;background:var(--low);transition:background .3s}
-  .camqual.q-bad{color:var(--fast)} .camqual.q-bad .dot{background:var(--fast)}
-  .camqual.q-mid{color:var(--slow)} .camqual.q-mid .dot{background:var(--slow)}
-  .camqual.q-good{color:var(--zone)} .camqual.q-good .dot{background:var(--zone)}
-  #camCv{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px}
-  canvas.wave{width:100%;height:70px;margin-top:14px;display:block}
-  .camlight{position:fixed;top:0;left:0;right:0;height:0;overflow:hidden;background:#fff;transition:height .25s;z-index:1;max-width:460px;margin:0 auto;pointer-events:none}
-  .camlight.on{height:190px}
-  .camdiag{text-align:center;margin-top:8px;font-size:12px;color:var(--low);font-variant-numeric:tabular-nums;min-height:16px;font-family:ui-monospace,Menlo,monospace}
-  /* 앞카메라 측정 시 화면 전체가 광원(플래시) — 흰 배경 + 검은 UI */
-  #s-cam.lit{background:#ffffff}
-  #s-cam.lit .eyebrow{color:#4a52c0}
-  #s-cam.lit h2{color:#111418}
-  #s-cam.lit .camsub,#s-cam.lit .small,#s-cam.lit .muted{color:#475063}
-  #s-cam.lit .camring .ct{stroke:#dfe2e9}
-  #s-cam.lit .camnum span{color:#111418;text-shadow:none}
-  #s-cam.lit .camnum small{color:#475063;text-shadow:none}
-  #s-cam.lit .camdiag{color:#6b7280}
-  #s-cam.lit .back{background:#fff;border-color:#d0d3da;color:#333}
-  #s-cam.lit .dock{background:linear-gradient(to top,#fff 62%,transparent)}
-  #s-cam.lit .btn.ghost{color:#111418;border-color:#d0d3da}
+
+  /* talk-test overlay */
+  .overlay{position:fixed;inset:0;z-index:40;background:rgba(8,10,14,.86);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:24px}
+  .overlay.on{display:flex;animation:fade .2s ease}
+  .prompt{max-width:400px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:26px 22px;text-align:center}
+  .prompt .count{font-size:44px;font-weight:800;letter-spacing:.06em;color:var(--accent);margin:6px 0 2px}
+  .prompt h2{font-size:21px;margin-top:10px}
+  .prompt p{color:var(--mid);font-size:14px;margin-top:8px}
+  .prompt .opts{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+  .prompt .opts button{width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;border:1px solid var(--line);background:var(--surface2);color:var(--hi);text-align:left;padding-left:18px;display:flex;align-items:center;gap:12px}
+  .prompt .opts button .e{font-size:18px}
+  .prompt .opts button.easy{border-color:var(--zone)} .prompt .opts button.mid{border-color:var(--slow)} .prompt .opts button.hard{border-color:var(--fast)}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:150px;z-index:50;background:var(--surface2);border:1px solid var(--line);color:var(--hi);font-size:14px;font-weight:700;padding:12px 18px;border-radius:12px;opacity:0;transition:opacity .3s;max-width:400px;text-align:center}
+  .toast.on{opacity:1}
+  .spark{display:block;width:100%;height:44px}
+  .pill{display:inline-block;font-size:11px;font-weight:800;color:var(--accent);background:var(--accent-dim);padding:4px 10px;border-radius:999px;letter-spacing:.04em}
 </style>
 
 <div class="app">
@@ -124,141 +101,69 @@
   <!-- 1. ONBOARD -->
   <section class="screen active" id="s-onboard">
     <div class="eyebrow">맥박계 없이 · 존2 러닝</div>
-    <h1>페이스로 심박을 추정해<br>당신의 존2를 찾아줍니다</h1>
-    <p class="lead">안정시 심박 하나만 재면, 나이와 함께 계산해서 슬로우런닝(존2)을 유지할 <b style="color:var(--hi)">목표 페이스 밴드</b>를 알려줘요.</p>
+    <h1>네 몸이 기준인<br>슬로우런닝 코치</h1>
+    <p class="lead">간단한 정보로 시작 페이스를 잡고, 뛰면서 "말 되냐?" 한 번씩 물어 <b style="color:var(--hi)">네 존2를 직접 찾아</b> 줍니다. 심박계 필요 없어요.</p>
 
-    <div class="card" style="margin-top:22px">
+    <div class="card" style="margin-top:20px">
       <label class="field" style="margin-top:0">
-        <span class="l">나이 <b id="ageV">35</b></span>
-        <input type="range" id="age" min="14" max="80" value="35">
+        <span class="l">나이 <b id="ageV">34</b></span>
+        <input type="range" id="age" min="14" max="80" value="34">
       </label>
-
+      <div class="field" style="margin-top:18px">
+        <span class="l" style="margin-bottom:0">성별</span>
+        <div class="seg" id="sexSeg">
+          <button data-sex="f" class="on">여성</button>
+          <button data-sex="m">남성</button>
+        </div>
+      </div>
+      <div class="numrow">
+        <label class="field"><span class="l">키 (cm)</span><input type="number" id="height" value="165" min="130" max="210" inputmode="numeric"></label>
+        <label class="field"><span class="l">몸무게 (kg)</span><input type="number" id="weight" value="60" min="35" max="150" inputmode="numeric"></label>
+      </div>
       <label class="field">
-        <span class="l">안정시 심박 (BPM)</span>
-        <input type="number" id="hrrest" value="62" min="35" max="120" inputmode="numeric">
+        <span class="l">평소 활동량 <b id="parV">가벼움</b></span>
+        <input type="range" id="par" min="0" max="7" value="2">
       </label>
-      <button class="btn sm" style="margin-top:12px;background:var(--surface2);color:var(--hi)" onclick="openCam()">📷 카메라로 안정시심박 측정</button>
-      <button class="btn ghost sm" style="margin-top:8px" onclick="openTap()">또는 손가락 맥박을 탭으로 측정</button>
-      <p class="note">카메라 측정은 앞카메라 렌즈에 손끝을 살짝 대고 폰 밝기를 올리면, 맥박에 따른 미세한 색변화를 읽습니다. 아침 안정시에 재면 가장 정확해요. 의료기기가 아닙니다.</p>
+      <p class="note">정확할 필요 없어요. 대충 시작점만 잡고, 뛰면서 네 몸에 맞게 자동으로 맞춰집니다.</p>
     </div>
 
     <div class="dock">
-      <button class="btn" onclick="calcProfile()">내 존2 계산하기</button>
+      <button class="btn" onclick="calcProfile()">내 시작 페이스 계산</button>
     </div>
   </section>
 
-  <!-- TAP HELPER -->
-  <section class="screen" id="s-tap">
-    <button class="back" onclick="show('onboard')">‹</button>
-    <div class="center" style="margin-top:40px">
-      <div class="eyebrow">15초 심박 측정</div>
-      <h2 style="margin-top:8px" id="tapHint">맥박이 뛸 때마다 탭하세요</h2>
-      <div class="big" id="tapTime" style="font-size:52px;margin:18px 0 4px">15<span class="u">초</span></div>
-      <button class="tapbtn" id="tapBtn" onclick="tap()">시작</button>
-      <div class="muted" style="margin-top:8px">탭 <b id="tapCount" style="color:var(--hi)">0</b> · 예상 <b id="tapBpm" style="color:var(--hi)">–</b> BPM</div>
-    </div>
-  </section>
-
-  <!-- CAMERA MEASURE -->
-  <section class="screen" id="s-cam">
-    <div class="camlight" id="camLight"></div>
-    <button class="back" onclick="stopCam();show('onboard')">‹</button>
-    <div class="center" style="margin-top:30px">
-      <div class="eyebrow">카메라 심박 측정</div>
-      <h2 id="camHint" style="margin-top:8px">준비되면 시작을 누르세요</h2>
-      <p class="small muted" id="camSub">앞카메라 렌즈에 손끝을 가볍게 대고, 폰 밝기를 최대로</p>
-    </div>
-    <div class="camstage">
-      <div class="camring">
-        <svg viewBox="0 0 120 120"><circle class="ct" cx="60" cy="60" r="54"/><circle class="cp" id="camProg" cx="60" cy="60" r="54"/></svg>
-        <video id="camVid" class="camprev" playsinline autoplay muted></video>
-        <div class="camnum"><span id="camBpm">–</span><small>BPM</small></div>
-      </div>
-    </div>
-    <div class="camqual" id="camQual"><span class="dot"></span><span id="camQualT">준비됨</span></div>
-    <div class="camdiag" id="camDiag"></div>
-    <canvas id="camWave" class="wave" height="70"></canvas>
-    <canvas id="camCv" width="60" height="60"></canvas>
-    <div class="dock stack">
-      <button class="btn" id="camAct" onclick="camPrimary()">측정 시작</button>
-      <button class="btn ghost sm" onclick="stopCam();openTap()">잘 안 잡히나요? 탭으로 측정</button>
-    </div>
-  </section>
-
-  <!-- 2. DASHBOARD -->
+  <!-- 2. DASH -->
   <section class="screen" id="s-dash">
-    <div class="eyebrow">당신의 프로필</div>
-    <h1 style="margin-bottom:14px">존2 목표 심박<br><span id="dZone" style="color:var(--zone)">–</span> <span class="u" style="font-size:22px;color:var(--mid);font-weight:700">BPM</span></h1>
+    <div class="eyebrow">예상 시작 페이스</div>
+    <h1 style="margin-bottom:12px">존2 목표 페이스<br><span id="dPace" style="color:var(--zone)">–</span> <span class="u" style="font-size:20px;color:var(--mid);font-weight:700">/km</span></h1>
 
     <div class="card">
-      <div class="eyebrow" style="color:var(--mid)">평지 기준 목표 페이스</div>
-      <div class="big" style="font-size:44px;margin-top:6px"><span id="dPace">–</span> <span class="u">/km</span></div>
-      <div class="small muted" style="margin-top:6px">이 페이스로 뛰면 존2 유지가 예상돼요. 오르막·더위엔 자동으로 느려집니다.</div>
+      <div class="small muted">이건 <b style="color:var(--hi)">추정 시작점</b>이에요. 첫 러닝에서 "말 되냐?" 몇 번 물어 <b style="color:var(--hi)">네 진짜 존2 페이스</b>를 찾습니다. 뛸수록 정확해져요.</div>
+      <div id="dSpark" style="margin-top:12px"></div>
     </div>
 
     <div class="grid2" style="margin-top:14px">
-      <div class="stat"><div class="k">최대심박 추정</div><div class="v" id="dHrmax">–</div></div>
-      <div class="stat"><div class="k">VO₂max 추정</div><div class="v" id="dVo2">– <small>ml/kg/min</small></div></div>
+      <div class="stat"><div class="k">추정 체력(VO₂max)</div><div class="v" id="dVo2">– <small>ml/kg/min</small></div></div>
+      <div class="stat"><div class="k">누적 러닝</div><div class="v" id="dRuns">0 <small>회</small></div></div>
     </div>
 
-    <p class="note">숫자는 <b>추정값</b>입니다. 실제 심박은 컨디션·날씨·개인차로 다를 수 있어요. 뛰면서 나오는 토크테스트로 점점 당신에게 맞춰집니다. 의료·진단 목적이 아닙니다.</p>
+    <p class="note">심박 숫자는 안 보여줍니다. 대신 뛰면서 지킬 수 있는 <b>페이스</b>와 "말 되냐?" 체크로 존2를 안내해요. 의료·진단 목적이 아닙니다.</p>
 
-    <div class="dock stack" style="gap:10px">
-      <button class="btn" onclick="startRun()">GPS 러닝 시작</button>
-      <button class="btn ghost" onclick="show('engine');syncEngine()">엔진 체험 · 페이스 슬라이더</button>
-    </div>
-  </section>
-
-  <!-- 3. ENGINE PLAYGROUND -->
-  <section class="screen" id="s-engine">
-    <button class="back" onclick="show('dash')">‹</button>
-    <div class="eyebrow" style="margin-top:36px">엔진 체험</div>
-    <h2 style="margin-bottom:2px">페이스를 바꿔보세요</h2>
-    <p class="small muted">뛴다고 가정한 페이스에서 추정 심박과 존이 실시간으로 바뀝니다.</p>
-
-    <div class="card" style="margin-top:16px">
-      <div class="hero" style="padding:2px 0 8px">
-        <div class="k">추정 심박</div>
-        <div class="big" style="font-size:56px"><span id="eHr">–</span><span class="u"> BPM</span></div>
-        <div class="small muted" id="eRange">– ~ – BPM</div>
-      </div>
-      <div class="gauge">
-        <div class="bar"><div class="mk" id="eMk" style="left:50%"></div></div>
-        <div class="lbls"><span>느림</span><span style="color:var(--zone)">존2</span><span>빠름</span></div>
-      </div>
-      <div class="center" style="margin-top:12px"><span class="status" id="eStat"><span class="dot"></span><span>–</span></span></div>
-    </div>
-
-    <div class="card">
-      <label class="field" style="margin-top:0">
-        <span class="l">페이스 <b><span id="epV">7:00</span> /km</span></span>
-        <input type="range" id="ep" min="180" max="600" step="5" value="420">
-      </label>
-      <label class="field">
-        <span class="l">경사 <b><span id="egV">0</span>%</b></span>
-        <input type="range" id="eg" min="-8" max="12" step="1" value="0">
-      </label>
-      <label class="field">
-        <span class="l">기온 <b><span id="etV">15</span>℃</b></span>
-        <input type="range" id="et" min="0" max="35" step="1" value="15">
-      </label>
-    </div>
-    <div class="card center">
-      <div class="k small muted" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700">지금 지형에서 존2 목표 페이스</div>
-      <div class="big" style="font-size:34px;margin-top:6px"><span id="eTarget">–</span> <span class="u">/km</span></div>
+    <div class="dock">
+      <button class="btn" onclick="startRun()">러닝 시작</button>
+      <button class="btn ghost sm" onclick="show('onboard')">정보 다시 입력</button>
     </div>
   </section>
 
-  <!-- 4. LIVE RUN -->
+  <!-- 3. RUN -->
   <section class="screen" id="s-run">
     <div class="eyebrow" id="runState">GPS 연결 중…</div>
-    <div class="center" style="margin-top:6px">
-      <span class="status" id="rStat"><span class="dot"></span><span>대기</span></span>
-    </div>
+    <div class="center" style="margin-top:8px"><span class="status" id="rStat"><span class="dot"></span><span>대기</span></span></div>
 
-    <div class="hero" style="margin-top:14px">
-      <div class="k">현재 페이스</div>
-      <div class="big"><span id="rPace">–:––</span><span class="u"> /km</span></div>
+    <div class="hero" style="margin-top:12px">
+      <div class="k">목표 존2 페이스</div>
+      <div class="big" style="font-size:40px"><span id="rBand">–</span> <span class="u">/km</span></div>
+      <div class="small muted" style="margin-top:6px">현재 <b id="rPace" style="color:var(--hi)">–:––</b> /km</div>
     </div>
 
     <div class="gauge">
@@ -267,424 +172,263 @@
     </div>
     <div class="center small muted" style="margin-top:8px" id="rCoach">움직이면 페이스가 잡혀요</div>
 
-    <div class="grid2" style="margin-top:18px">
+    <div class="grid2" style="margin-top:16px">
       <div class="stat"><div class="k">거리</div><div class="v"><span id="rDist">0.00</span> <small>km</small></div></div>
       <div class="stat"><div class="k">시간</div><div class="v" id="rTime">0:00</div></div>
-      <div class="stat"><div class="k">추정 심박</div><div class="v"><span id="rHr">–</span> <small>BPM ≈</small></div></div>
       <div class="stat"><div class="k">존2 유지율</div><div class="v"><span id="rPct">0</span><small>%</small></div></div>
+      <div class="stat"><div class="k">말 체크</div><div class="v"><span id="rChecks">0</span><small>회</small></div></div>
     </div>
 
-    <svg class="route" id="rRoute" viewBox="0 0 300 170" style="margin-top:16px" preserveAspectRatio="none"><polyline id="rLine" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points=""/></svg>
+    <svg class="route" id="rRoute" viewBox="0 0 300 170" style="margin-top:14px" preserveAspectRatio="none"><polyline id="rLine" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points=""/></svg>
 
-    <div class="dock btnrow">
-      <button class="btn ghost" id="rPause" onclick="pauseRun()">일시정지</button>
-      <button class="btn" onclick="stopRun()">종료</button>
+    <div class="dock">
+      <button class="btn ghost sm" onclick="askTalk(true)">지금 말 체크 해보기</button>
+      <div class="btnrow">
+        <button class="btn ghost" id="rPause" onclick="pauseRun()">일시정지</button>
+        <button class="btn" onclick="stopRun()">종료</button>
+      </div>
     </div>
   </section>
 
-  <!-- 5. SUMMARY -->
+  <!-- 4. SUMMARY -->
   <section class="screen" id="s-sum">
     <div class="eyebrow">러닝 완료</div>
-    <h1 style="margin-bottom:14px">수고했어요</h1>
+    <h1 style="margin-bottom:12px" id="sHead">수고했어요</h1>
     <div class="card center">
       <div class="k small muted" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700">존2 유지율</div>
       <div class="big" style="color:var(--zone)"><span id="sPct">0</span><span class="u"> %</span></div>
+      <div class="small muted" id="sBandMsg" style="margin-top:6px"></div>
     </div>
     <div class="grid2" style="margin-top:14px">
       <div class="stat"><div class="k">거리</div><div class="v"><span id="sDist">0.00</span> <small>km</small></div></div>
       <div class="stat"><div class="k">시간</div><div class="v" id="sTime">0:00</div></div>
       <div class="stat"><div class="k">평균 페이스</div><div class="v"><span id="sPace">–</span> <small>/km</small></div></div>
-      <div class="stat"><div class="k">평균 심박 ≈</div><div class="v"><span id="sHr">–</span> <small>BPM</small></div></div>
+      <div class="stat"><div class="k">말 체크</div><div class="v"><span id="sChecks">0</span> <small>회</small></div></div>
     </div>
     <div class="card" style="margin-top:14px">
       <div class="k small muted" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:8px">달린 경로 · 존2 색상</div>
       <svg class="route" id="sRoute" viewBox="0 0 300 170" preserveAspectRatio="none"></svg>
     </div>
     <div class="dock">
-      <button class="btn" onclick="show('dash')">완료</button>
+      <button class="btn" onclick="show('dash');renderDash()">완료</button>
     </div>
   </section>
 
+  <!-- TALK PROMPT OVERLAY -->
+  <div class="overlay" id="overlay">
+    <div class="prompt">
+      <span class="pill">잠깐, 말 체크</span>
+      <div class="count">1 2 3 … 10</div>
+      <h2>소리 내 열까지 세보세요</h2>
+      <p>한 문장 편하게 말할 수 있나요?<br>이게 존2인지 알려주는 진짜 기준이에요.</p>
+      <div class="opts">
+        <button class="easy" onclick="answerTalk('easy')"><span class="e">😮‍💨</span><span>한 숨에 편하게 셌다</span></button>
+        <button class="mid" onclick="answerTalk('mid')"><span class="e">😤</span><span>중간에 숨 쉬어야 했다</span></button>
+        <button class="hard" onclick="answerTalk('hard')"><span class="e">🥵</span><span>못 세겠다 / 헐떡인다</span></button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
 </div>
 
 <script>
 (function(){
   "use strict";
-  var P={age:35,hrrest:62,hrmax:0,hrr:0,vo2max:0,hrLow:0,hrHigh:0};
   var $=function(id){return document.getElementById(id)};
+  var VO2REST=3.5, ZLO=0.60, ZHI=0.70;
+  var P=null; // profile
+  var prog={vo2maxHistory:[],runs:0};
 
-  function show(id){
-    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
-    $('s-'+id).classList.add('active');
-    window.scrollTo(0,0);
-  }
+  function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});$('s-'+id).classList.add('active');window.scrollTo(0,0);}
   window.show=show;
 
   // ---------- physiology ----------
-  var VO2REST=3.5;
-  function gradeEff(g){return g<0? g*0.5 : g;}          // 내리막 감쇠
-  function tempCorr(t){return 0.8*Math.max(0,t-15);}    // 더위 보정 bpm
-  // pace(sec/km) + grade% + temp -> estimated HR
-  function estHR(paceSec,gPct,tempC){
-    var speed=1000/(paceSec/60);                        // m/min
-    var g=gradeEff(gPct/100);
-    var vo2=0.2*speed+0.9*speed*g+VO2REST;
-    var pctR=(vo2-VO2REST)/(P.vo2max-VO2REST);
-    return P.hrrest+pctR*P.hrr+tempCorr(tempC);
-  }
-  // target HR -> pace(sec/km) at given grade/temp  (inverse)
-  function paceForHR(hr,gPct,tempC){
-    var hrp=hr-tempCorr(tempC);
-    var pctR=(hrp-P.hrrest)/P.hrr;
-    if(pctR<0.01)pctR=0.01;
-    var vo2=VO2REST+pctR*(P.vo2max-VO2REST);
-    var g=gradeEff(gPct/100);
-    var speed=(vo2-VO2REST)/(0.2+0.9*g);                // m/min
-    if(speed<=0)return 0;
-    return (1000/speed)*60;                             // sec/km
-  }
-  function fmtPace(sec){
-    if(!sec||!isFinite(sec)||sec>3600)return "–:––";
-    var m=Math.floor(sec/60),s=Math.round(sec%60);
-    if(s===60){m++;s=0;}
-    return m+":"+(s<10?"0":"")+s;
-  }
-  // marker position 0..100 across domain 0.45..0.85 HRR
-  function markPos(hr){
-    var pct=(hr-P.hrrest)/P.hrr;
-    var pos=(pct-0.45)/0.40*100;
-    return Math.max(2,Math.min(98,pos));
-  }
-  function zoneOf(hr){
-    if(hr<P.hrLow)return"slow"; if(hr>P.hrHigh)return"fast"; return"zone";
-  }
-  var Z={zone:{t:"존2 유지 중",c:"is-zone"},slow:{t:"조금 빠르게",c:"is-slow"},fast:{t:"속도 낮추기",c:"is-fast"}};
-  // 느림=페이스 느려 심박 낮음. "조금 빠르게" 안내. 빠름=심박 높음 "속도 낮추기".
+  function gradeEff(g){return g<0?g*0.5:g;}
+  function coldVo2max(sp){var m=sp.heightCm/100, bmi=sp.weightKg/(m*m);var s=sp.sex==='m'?1:0;
+    var v=56.363 + 1.921*sp.par - 0.381*sp.age - 0.754*bmi + 10.987*s;
+    return Math.max(18,Math.min(65,v));}
+  // pace(sec/km)+grade -> %VO2R (given vo2max)
+  function intensity(paceS,gPct,vo2max){var spd=1000/(paceS/60);var g=gradeEff(gPct/100);var vo2=0.2*spd+0.9*spd*g+VO2REST;return (vo2-VO2REST)/(vo2max-VO2REST);}
+  // target %VO2R -> pace(sec/km) at grade
+  function paceForR(r,gPct,vo2max){var vo2=VO2REST+r*(vo2max-VO2REST);var g=gradeEff(gPct/100);var spd=(vo2-VO2REST)/(0.2+0.9*g);if(spd<=0)return 0;return (1000/spd)*60;}
+  function bandFor(gPct,vo2max){return {fast:paceForR(ZHI,gPct,vo2max), slow:paceForR(ZLO,gPct,vo2max)};}
+  function fmtPace(sec){if(!sec||!isFinite(sec)||sec>3600)return "–:––";var m=Math.floor(sec/60),s=Math.round(sec%60);if(s===60){m++;s=0;}return m+":"+(s<10?"0":"")+s;}
+  function fmtClock(s){var m=Math.floor(s/60);return m+":"+((s%60)<10?"0":"")+(s%60);}
+  function zoneOfR(r){if(r<ZLO)return"slow";if(r>ZHI)return"fast";return"zone";}
+  var Z={zone:{t:"존2 유지 중",c:"is-zone"},slow:{t:"조금 올려도 돼",c:"is-slow"},fast:{t:"조금 늦춰",c:"is-fast"}};
+  // gauge marker: r across domain 0.45..0.85
+  function markPos(r){var p=(r-0.45)/0.40*100;return Math.max(2,Math.min(98,p));}
+
+  // ---------- persistence ----------
+  function save(){try{localStorage.setItem('z2v2_profile',JSON.stringify(P));localStorage.setItem('z2v2_progress',JSON.stringify(prog));}catch(e){}}
+  function load(){try{var p=JSON.parse(localStorage.getItem('z2v2_profile'));if(p&&p.vo2max)P=p;var g=JSON.parse(localStorage.getItem('z2v2_progress'));if(g)prog=g;}catch(e){}}
+
+  var PAR_LBL=['거의 안 움직임','아주 가끔','가벼움','주 1~2회','주 2~3회','주 3~4회','주 4~5회','거의 매일 고강도'];
+  $('age').addEventListener('input',function(){$('ageV').textContent=this.value});
+  $('par').addEventListener('input',function(){$('parV').textContent=PAR_LBL[this.value]});
+  $('sexSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;this.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');});
 
   function calcProfile(){
-    P.age=+$('age').value;
-    P.hrrest=Math.max(35,Math.min(120,+$('hrrest').value||62));
-    P.hrmax=Math.round(208-0.7*P.age);
-    P.hrr=P.hrmax-P.hrrest;
-    P.vo2max=15*(P.hrmax/P.hrrest);
-    P.hrLow=Math.round(P.hrrest+0.60*P.hrr);
-    P.hrHigh=Math.round(P.hrrest+0.70*P.hrr);
-    try{localStorage.setItem('z2',JSON.stringify(P))}catch(e){}
-    renderDash();
-    show('dash');
+    var sex=$('sexSeg').querySelector('.on').dataset.sex;
+    var sp={age:+$('age').value, sex:sex, heightCm:+$('height').value||165, weightKg:+$('weight').value||60, par:+$('par').value};
+    var v=coldVo2max(sp);
+    P={age:sp.age,sex:sp.sex,heightCm:sp.heightCm,weightKg:sp.weightKg,par:sp.par,vo2max0:v,vo2max:v,createdAt:Date.now()};
+    if(!prog.vo2maxHistory.length)prog.vo2maxHistory.push({t:Date.now(),vo2max:v});
+    save();renderDash();show('dash');
   }
   window.calcProfile=calcProfile;
 
   function renderDash(){
-    $('dZone').textContent=P.hrLow+"–"+P.hrHigh;
-    $('dHrmax').textContent=P.hrmax+" BPM";
+    var b=bandFor(0,P.vo2max);
+    $('dPace').textContent=fmtPace(b.fast)+"–"+fmtPace(b.slow);
     $('dVo2').innerHTML=Math.round(P.vo2max)+' <small>ml/kg/min</small>';
-    var pl=paceForHR(P.hrLow,0,15), ph=paceForHR(P.hrHigh,0,15);
-    $('dPace').textContent=fmtPace(ph)+"–"+fmtPace(pl); // 빠른끝~느린끝
+    $('dRuns').innerHTML=prog.runs+' <small>회</small>';
+    drawSpark($('dSpark'));
   }
-
-  // ---------- tap helper ----------
-  var tapN=0,tapT=null,tapLeft=15,tapRun=false;
-  window.openTap=function(){tapN=0;tapLeft=15;tapRun=false;$('tapCount').textContent=0;$('tapBpm').textContent='–';$('tapTime').innerHTML='15<span class="u">초</span>';$('tapBtn').textContent='시작';$('tapHint').textContent='맥박이 뛸 때마다 탭하세요';show('tap');};
-  window.tap=function(){
-    if(!tapRun){
-      tapRun=true;tapN=0;tapLeft=15;$('tapBtn').textContent='탭!';$('tapHint').textContent='박동마다 탭 · 15초';
-      tapT=setInterval(function(){
-        tapLeft--;$('tapTime').innerHTML=tapLeft+'<span class="u">초</span>';
-        if(tapLeft<=0){clearInterval(tapT);tapRun=false;
-          var bpm=tapN*4;$('tapBpm').textContent=bpm;$('tapBtn').textContent='이 값 쓰기 ('+bpm+')';$('tapHint').textContent='측정 완료';
-          $('tapBtn').onclick=function(){$('hrrest').value=bpm;$('tapBtn').onclick=window.tap;show('onboard');};
-        }
-      },1000);
-      return;
-    }
-    tapN++;$('tapCount').textContent=tapN;
-  };
-
-  // ---------- engine playground ----------
-  function syncEngine(){
-    var ps=+$('ep').value, g=+$('eg').value, t=+$('et').value;
-    $('epV').textContent=fmtPace(ps);$('egV').textContent=(g>0?'+':'')+g;$('etV').textContent=t;
-    var hr=estHR(ps,g,t);
-    $('eHr').textContent=Math.round(hr);
-    $('eRange').textContent=Math.round(hr-6)+" ~ "+Math.round(hr+6)+" BPM";
-    $('eMk').style.left=markPos(hr)+"%";
-    var z=zoneOf(hr);$('eStat').className='status '+Z[z].c;$('eStat').lastChild.textContent=Z[z].t;
-    var pl=paceForHR(P.hrLow,g,t),ph=paceForHR(P.hrHigh,g,t);
-    $('eTarget').textContent=fmtPace(ph)+"–"+fmtPace(pl);
+  function drawSpark(host){
+    var h=prog.vo2maxHistory;if(h.length<2){host.innerHTML='<div class="small muted">러닝을 쌓으면 여기 체력 변화가 그려져요.</div>';return;}
+    var vs=h.map(function(x){return x.vo2max}),mn=Math.min.apply(0,vs)-1,mx=Math.max.apply(0,vs)+1,rng=(mx-mn)||1,W=300,H=44;
+    var pts=h.map(function(x,i){var px=i/(h.length-1)*W;var py=H-4-((x.vo2max-mn)/rng)*(H-8);return px.toFixed(1)+','+py.toFixed(1);}).join(' ');
+    host.innerHTML='<svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="var(--zone)" stroke-width="2.5" stroke-linejoin="round"/></svg><div class="small muted" style="margin-top:4px">체력(VO₂max) 추이 · 오를수록 존2 페이스가 빨라져요</div>';
   }
-  window.syncEngine=syncEngine;
-  ['ep','eg','et'].forEach(function(id){$(id).addEventListener('input',syncEngine)});
-  $('age').addEventListener('input',function(){$('ageV').textContent=this.value});
+  window.renderDash=renderDash;
 
-  // ---------- live run ----------
+  // ---------- run ----------
   var run=null;
   function startRun(){
-    run={pts:[],dist:0,t0:Date.now(),paused:false,secZone:0,secTot:0,hrSum:0,hrN:0,lastFix:null,pace:0,watch:null,tick:null,demo:false};
-    show('run');
-    $('rPause').textContent='일시정지';
+    run={pts:[],dist:0,t0:Date.now(),paused:false,secTot:0,secZone:0,pace:0,grade:0,lastFix:null,watch:null,tick:null,demo:false,
+         _lastPromptSec:0,checks:0,promptOpen:false,curR:0,firstBand:bandFor(0,P.vo2max),intenseSum:0,intenseN:0};
+    show('run');$('rPause').textContent='일시정지';$('rChecks').textContent=0;$('rPct').textContent=0;$('rDist').textContent='0.00';$('rTime').textContent='0:00';$('rLine').setAttribute('points','');
+    updateBandUI();
     if(!navigator.geolocation){return startDemo();}
     $('runState').textContent='GPS 연결 중…';
-    run.watch=navigator.geolocation.watchPosition(onFix,function(err){
-      // 권한 거부/차단 -> 데모 모드
-      startDemo();
-    },{enableHighAccuracy:true,maximumAge:1000,timeout:8000});
+    run.watch=navigator.geolocation.watchPosition(onFix,function(){startDemo();},{enableHighAccuracy:true,maximumAge:1000,timeout:9000});
     run.tick=setInterval(loopRun,1000);
   }
   window.startRun=startRun;
 
-  function haversine(a,b){
-    var R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lng-a.lng)*Math.PI/180;
-    var la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180;
-    var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)*Math.sin(dLon/2);
-    return 2*R*Math.asin(Math.sqrt(x));
-  }
+  function haversine(a,b){var R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lng-a.lng)*Math.PI/180,la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180;var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)*Math.sin(dLon/2);return 2*R*Math.asin(Math.sqrt(x));}
   function onFix(pos){
-    if(run.paused)return;
-    $('runState').textContent='GPS 추적 중';
+    if(run.paused)return;$('runState').textContent='GPS 추적 중';
     var p={lat:pos.coords.latitude,lng:pos.coords.longitude,t:Date.now()};
-    if(run.lastFix){
-      var d=haversine(run.lastFix,p);
-      if(d>1.5){run.dist+=d;run.pts.push(p);drawRoute($('rLine'),run.pts);}
-    }else{run.pts.push(p);}
+    if(run.lastFix){var d=haversine(run.lastFix,p);if(d>1.5){run.dist+=d;run.pts.push(p);drawRoute($('rLine'),run.pts);}}
+    else run.pts.push(p);
     run.lastFix=p;
-    // 최근 25초 이동으로 페이스
     var now=Date.now(),win=run.pts.filter(function(q){return now-q.t<25000});
-    if(win.length>=2){
-      var dd=0;for(var i=1;i<win.length;i++)dd+=haversine(win[i-1],win[i]);
-      var dt=(win[win.length-1].t-win[0].t)/1000;
-      if(dd>3&&dt>0){var speed=dd/dt;run.pace=1000/speed;} else {run.pace=0;}
-    }
+    if(win.length>=2){var dd=0;for(var i=1;i<win.length;i++)dd+=haversine(win[i-1],win[i]);var dt=(win[win.length-1].t-win[0].t)/1000;if(dd>3&&dt>0)run.pace=1000/(dd/dt);else run.pace=0;}
   }
   function startDemo(){
-    if(run.demo)return;run.demo=true;
-    $('runState').textContent='데모 모드 · GPS 권한이 없어 자동 페이스로 시연';
+    if(run.demo)return;run.demo=true;$('runState').textContent='데모 모드 · GPS 권한 없어 자동 페이스로 시연';
     if(run.watch){navigator.geolocation.clearWatch(run.watch);run.watch=null;}
     if(!run.tick)run.tick=setInterval(loopRun,1000);
-    // 존2 근처를 오가는 가짜 페이스 + 가짜 경로
-    var base=paceForHR((P.hrLow+P.hrHigh)/2,0,15), ang=0, cx=150,cy=85;
-    run._demoStep=function(){
-      run.pace=base*(1+0.14*Math.sin(Date.now()/9000));
-      ang+=0.18; var r=55+18*Math.sin(ang/3);
-      var p={lat:0,lng:0,t:Date.now(),x:cx+r*Math.cos(ang),y:cy+r*Math.sin(ang)};
-      run.dist+=base? (1000/run.pace):0; // approx m/s per tick
-      run.pts.push(p);drawRoute($('rLine'),run.pts,true);
+    // 초반 빠르게 출발 → 프롬프트/교정 시연되게. 존2 근처를 오가되 살짝 빠른 쪽.
+    var mid=(run.firstBand.fast+run.firstBand.slow)/2, ang=0;
+    run._demo=function(){
+      var t=(Date.now()-run.t0)/1000;
+      run.pace = t<20 ? mid*0.8 : mid*(1+0.12*Math.sin(t/12)); // 첫 20초 과속(헐떡 유도)
+      ang+=0.17;var r=52+16*Math.sin(ang/3);
+      run.pts.push({x:150+r*Math.cos(ang),y:85+r*Math.sin(ang),t:Date.now()});
+      run.dist+= run.pace? (1000/run.pace):0;
+      drawRoute($('rLine'),run.pts,true);
     };
   }
   function loopRun(){
-    if(!run||run.paused)return;
-    if(run.demo&&run._demoStep)run._demoStep();
+    if(!run||run.paused||run.promptOpen)return;
+    if(run.demo&&run._demo)run._demo();
     run.secTot++;
-    var hr=run.pace? estHR(run.pace,0,15):0;
-    var z=run.pace?zoneOf(hr):null;
-    if(z==='zone')run.secZone++;
-    if(hr){run.hrSum+=hr;run.hrN++;}
-    // render
+    if(run.pace){
+      run.curR=intensity(run.pace,run.grade,P.vo2max);
+      var z=zoneOfR(run.curR);
+      if(z==='zone')run.secZone++;
+      run.intenseSum+=run.curR;run.intenseN++;
+    }
+    renderRun();
+    maybePrompt();
+  }
+  function renderRun(){
     $('rPace').textContent=run.pace?fmtPace(run.pace):'–:––';
     $('rDist').textContent=(run.dist/1000).toFixed(2);
     $('rTime').textContent=fmtClock(run.secTot);
-    $('rHr').textContent=hr?Math.round(hr):'–';
-    var pct=run.secTot?Math.round(run.secZone/run.secTot*100):0;$('rPct').textContent=pct;
-    if(hr){
-      $('rMk').style.left=markPos(hr)+"%";
+    $('rPct').textContent=run.secTot?Math.round(run.secZone/run.secTot*100):0;
+    $('rChecks').textContent=run.checks;
+    if(run.pace){
+      var z=zoneOfR(run.curR);
+      $('rMk').style.left=markPos(run.curR)+"%";
       $('rStat').className='status '+Z[z].c;$('rStat').lastChild.textContent=Z[z].t;
-      $('rCoach').textContent=z==='zone'?'좋아요. 이 리듬 유지하세요.':z==='slow'?'조금만 더 빠르게 가도 돼요.':'숨이 편해지게 속도를 낮추세요.';
+      $('rCoach').textContent=z==='zone'?'좋아요. 이 리듬 유지하세요.':z==='slow'?'편하면 조금 올려도 돼요.':'숨이 편해지게 조금 늦추세요.';
     }
+    updateBandUI();
   }
-  function fmtClock(s){var m=Math.floor(s/60);return m+":"+((s%60)<10?"0":"")+(s%60);}
+  function updateBandUI(){var b=bandFor(run?run.grade:0,P.vo2max);$('rBand').textContent=fmtPace(b.fast)+"–"+fmtPace(b.slow);}
+
+  function maybePrompt(){
+    if(run.promptOpen)return;
+    var gap = run.secTot - (run._lastPromptSec||0);  // 마지막 프롬프트 이후 경과(초)
+    if(gap<120)return;                                // 최소 2분 간격
+    if(run.curR>0.66 || gap>=240){ askTalk(false); }  // 임계 부근이거나 4분 경과
+  }
+
+  window.askTalk=function(manual){
+    if(!run||run.promptOpen)return;
+    run.promptOpen=true;run._lastPromptSec=run.secTot;
+    $('overlay').classList.add('on');
+    try{navigator.vibrate&&navigator.vibrate([120,60,120]);}catch(e){}
+    beep();
+  };
+  window.answerTalk=function(resp){
+    if(!run)return;
+    run.checks++;
+    var before=P.vo2max, r=run.pace?intensity(run.pace,run.grade,P.vo2max):ZHI;
+    if(resp==='easy'){ P.vo2max *= (r>0.66?1.04:1.01); }
+    else if(resp==='hard'){ P.vo2max *= 0.95; }
+    else { P.vo2max *= 1.00; }
+    P.vo2max=Math.max(15,Math.min(75,P.vo2max));
+    run.promptLog=run.promptLog||[];run.promptLog.push({t:run.secTot,paceS:run.pace,resp:resp});
+    save();updateBandUI();
+    $('overlay').classList.remove('on');run.promptOpen=false;
+    var b=bandFor(0,P.vo2max);
+    var msg = resp==='hard' ? '알겠어, 목표를 조금 늦출게 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
+            : resp==='easy' ? '아직 여유 있네, 목표 페이스 조정 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
+            : '딱 좋아, 그대로 유지';
+    toast(msg);
+    $('rChecks').textContent=run.checks;
+  };
+
+  function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2600);}
+  var actx=null;
+  function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.frequency.value=880;g.gain.value=0.06;o.start();setTimeout(function(){o.stop();},160);}catch(e){}}
+
   function drawRoute(el,pts,demo){
-    if(pts.length<2)return;
-    var pointsStr;
-    if(demo){pointsStr=pts.map(function(p){return p.x.toFixed(1)+","+p.y.toFixed(1)}).join(" ");}
-    else{
-      var la=pts.map(function(p){return p.lat}),lo=pts.map(function(p){return p.lng});
-      var laMin=Math.min.apply(0,la),laMax=Math.max.apply(0,la),loMin=Math.min.apply(0,lo),loMax=Math.max.apply(0,lo);
-      var sLa=(laMax-laMin)||1e-6,sLo=(loMax-loMin)||1e-6,pad=14;
-      pointsStr=pts.map(function(p){
-        var x=pad+(p.lng-loMin)/sLo*(300-2*pad);
-        var y=170-pad-(p.lat-laMin)/sLa*(170-2*pad);
-        return x.toFixed(1)+","+y.toFixed(1);
-      }).join(" ");
-    }
-    el.setAttribute('points',pointsStr);
+    if(pts.length<2)return;var s;
+    if(demo){s=pts.map(function(p){return p.x.toFixed(1)+','+p.y.toFixed(1)}).join(' ');}
+    else{var la=pts.map(function(p){return p.lat}),lo=pts.map(function(p){return p.lng});var laMin=Math.min.apply(0,la),laMax=Math.max.apply(0,la),loMin=Math.min.apply(0,lo),loMax=Math.max.apply(0,lo);var sLa=(laMax-laMin)||1e-6,sLo=(loMax-loMin)||1e-6,pad=14;s=pts.map(function(p){var x=pad+(p.lng-loMin)/sLo*(300-2*pad);var y=170-pad-(p.lat-laMin)/sLa*(170-2*pad);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');}
+    el.setAttribute('points',s);
   }
   window.pauseRun=function(){run.paused=!run.paused;$('rPause').textContent=run.paused?'재개':'일시정지';$('runState').textContent=run.paused?'일시정지됨':'추적 중';};
   window.stopRun=function(){
-    if(run.watch)navigator.geolocation.clearWatch(run.watch);
-    if(run.tick)clearInterval(run.tick);
+    if(run.watch)navigator.geolocation.clearWatch(run.watch);if(run.tick)clearInterval(run.tick);
+    prog.runs++;prog.vo2maxHistory.push({t:Date.now(),vo2max:P.vo2max});if(prog.vo2maxHistory.length>60)prog.vo2maxHistory.shift();save();
     $('sDist').textContent=(run.dist/1000).toFixed(2);
     $('sTime').textContent=fmtClock(run.secTot);
-    var avgP=run.dist>50?(run.secTot/(run.dist/1000)):0;
-    $('sPace').textContent=avgP?fmtPace(avgP):'–';
-    $('sHr').textContent=run.hrN?Math.round(run.hrSum/run.hrN):'–';
+    var avg=run.dist>50?(run.secTot/(run.dist/1000)):0;$('sPace').textContent=avg?fmtPace(avg):'–';
     $('sPct').textContent=run.secTot?Math.round(run.secZone/run.secTot*100):0;
-    // 요약 경로 = 존2 색상 폴리라인
-    var line=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    line.setAttribute('fill','none');line.setAttribute('stroke','var(--zone)');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linejoin','round');
-    $('sRoute').innerHTML='';$('sRoute').appendChild(line);
-    drawRoute(line,run.pts,run.demo);
+    $('sChecks').textContent=run.checks;
+    // 밴드 변화 메시지
+    var nb=bandFor(0,P.vo2max), delta=Math.round((run.firstBand.slow - nb.slow));
+    var bm = run.checks===0 ? '다음엔 "말 체크"에 답하면 네 존2가 더 정확해져요.'
+           : delta>3 ? '네 존2 페이스가 이번에 '+delta+'초/km 빨라졌어요 (더 편하게 느껴짐).'
+           : delta<-3 ? '네 존2를 조금 더 천천히로 맞췄어요. 그게 진짜 easy예요.'
+           : '네 존2 페이스가 안정적으로 자리잡고 있어요.';
+    $('sBandMsg').textContent=bm;
+    var line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('fill','none');line.setAttribute('stroke','var(--zone)');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linejoin','round');
+    $('sRoute').innerHTML='';$('sRoute').appendChild(line);drawRoute(line,run.pts,run.demo);
     show('sum');
   };
 
-  // ---------- camera PPG ----------
-  // 정규화 자기상관 + 첫 유의미피크(옥타브 방어). node에서 랜덤노이즈 30/30, 이중봉우리 포함
-  function bpmAuto(s){
-    if(!s||s.length<40)return null;
-    var t0=s[0].t,t1=s[s.length-1].t,dur=(t1-t0)/1000;
-    if(dur<6)return null;
-    var fs=25,N=Math.floor(dur*fs);
-    var v=new Array(N),j=0;
-    for(var i=0;i<N;i++){var t=t0+i/fs*1000;while(j<s.length-2&&s[j+1].t<t)j++;var a=s[j],b=s[j+1]||s[j];var f=(b.t-a.t)?(t-a.t)/(b.t-a.t):0;v[i]=a.v+(b.v-a.v)*f;}
-    // 프리스무딩(5탭) — 고주파 노이즈/에일리어싱 억제
-    var sm=new Array(N);for(var i=0;i<N;i++){var s0=0,c=0;for(var k=Math.max(0,i-2);k<=Math.min(N-1,i+2);k++){s0+=v[k];c++;}sm[i]=s0/c;}v=sm;
-    // 저주파 baseline 제거(±1.5s)
-    var w=Math.round(fs*1.5),base=new Array(N);
-    for(var i=0;i<N;i++){var s0=0,c=0;for(var k=Math.max(0,i-w);k<=Math.min(N-1,i+w);k++){s0+=v[k];c++;}base[i]=s0/c;}
-    for(var i=0;i<N;i++)v[i]-=base[i];
-    var mean=0;for(var i=0;i<N;i++)mean+=v[i];mean/=N;for(var i=0;i<N;i++)v[i]-=mean;
-    var energy=0;for(var i=0;i<N;i++)energy+=v[i]*v[i];if(energy<=0)return null;
-    var lagMin=Math.floor(fs*60/180),lagMax=Math.ceil(fs*60/40),corr=[];
-    for(var lag=lagMin;lag<=lagMax;lag++){var cc=0;for(var i=0;i+lag<N;i++)cc+=v[i]*v[i+lag];corr[lag]=cc/energy;}
-    // threshold 넘는 첫 로컬피크 = 기본주기(배수에 안 걸림). 없으면 낮은 floor로 재탐색, 그래도 없으면 null
-    function firstPeak(th){for(var L=lagMin+1;L<lagMax;L++){if(corr[L]>=corr[L-1]&&corr[L]>corr[L+1]&&corr[L]>=th)return L;}return -1;}
-    var bestLag=firstPeak(0.25);
-    if(bestLag<0)bestLag=firstPeak(0.14);
-    if(bestLag<0)return null;
-    var cl=corr[bestLag-1]||corr[bestLag],cr=corr[bestLag+1]||corr[bestLag],cc=corr[bestLag];
-    var den=(cl-2*cc+cr),d=den?0.5*(cl-cr)/den:0;
-    return Math.round(60*fs/(bestLag+d));
-  }
-  var cam={stream:null,track:null,raf:null,samples:[],running:false,t0:0,lastBpm:0,goodMs:0,lastTs:0,needMs:6000,maxMs:45000};
-  window.openCam=function(){resetCam();show('cam');};
-  function resetCam(){
-    cam.samples=[];cam.running=false;cam.lastBpm=0;cam.hist=[];cam.goodMs=0;cam.lastTs=0;
-    $('camBpm').textContent='–';$('camProg').style.strokeDashoffset=339;
-    $('camHint').textContent='준비되면 시작을 누르세요';
-    $('camSub').textContent='앞카메라 렌즈에 손끝을 가볍게 대고, 폰 밝기를 최대로';
-    setQual('','준비됨');$('camDiag').textContent='';
-    var a=$('camAct');a.textContent='측정 시작';a.disabled=false;a.dataset.done='';
-    var wc=$('camWave');try{wc.getContext('2d').clearRect(0,0,wc.width||400,wc.height)}catch(e){}
-  }
-  window.camPrimary=function(){
-    var a=$('camAct');
-    if(a.dataset.done==='1'){$('hrrest').value=a.dataset.bpm;stopCam();show('onboard');return;}
-    if(cam.running)return;
-    startCam();
-  };
-  function startCam(){
-    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){camFail('이 브라우저는 카메라를 지원하지 않아요');return;}
-    $('camHint').textContent='카메라 켜는 중…';$('camAct').disabled=true;
-    var isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-    // iOS: 플래시 불가 + 후면 트리플카메라가 자동 렌즈전환하며 초점 헤맴 → 곧장 앞카메라+화면빛
-    if(isiOS){ useFront(); return; }
-    // Android 등: 후면+플래시 시도, 플래시 안 되면 앞카메라
-    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}}).then(function(st){
-      var track=st.getVideoTracks()[0],torch=false;
-      try{var caps=track.getCapabilities&&track.getCapabilities();if(caps&&caps.torch){track.applyConstraints({advanced:[{torch:true}]});torch=true;}}catch(e){}
-      if(torch){beginCapture(st,track,true);}
-      else{st.getTracks().forEach(function(t){try{t.stop()}catch(e){}});useFront();}
-    }).catch(function(){useFront();});
-  }
-  function useFront(){
-    navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}).then(function(st){
-      $('s-cam').classList.add('lit');
-      beginCapture(st,st.getVideoTracks()[0],false);
-    }).catch(function(){camFail('카메라 권한이 필요해요. 아트팩트 안에선 막혀요 — 배포된 링크를 새 탭에서 열거나 탭 측정을 쓰세요');});
-  }
-  function beginCapture(st,track,torch){
-    cam.stream=st;cam.track=track;cam.torch=torch;
-    var vid=$('camVid');vid.srcObject=st;var pp=vid.play&&vid.play();if(pp&&pp.catch)pp.catch(function(){});
-    cam.running=true;cam.t0=Date.now();cam.samples=[];cam.hist=[];cam.goodMs=0;cam.lastTs=0;
-    $('camHint').textContent=torch?'손끝을 후면 렌즈에 대고 가만히':'위쪽 앞카메라에 손끝을 대세요';
-    $('camSub').textContent=torch?'후면 플래시 · 잘 잡히면 자동 완료':'하얀 화면이 플래시예요 · 손끝으로 앞카메라를 덮으면 붉게 변해요';
-    $('camAct').textContent='측정 중…';$('camAct').disabled=true;
-    loopCam();
-  }
-  function loopCam(){
-    if(!cam.running)return;
-    var vid=$('camVid'),cv=$('camCv'),c=cv.getContext('2d');
-    if(vid.videoWidth){
-      c.drawImage(vid,0,0,cv.width,cv.height);
-      var d=c.getImageData(0,0,cv.width,cv.height).data,r=0,g=0,b=0,n=cv.width*cv.height;
-      for(var i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];}
-      r/=n;g/=n;b/=n;
-      cam.samples.push({t:Date.now()-cam.t0,v:r});
-      updateCam((r+g+b)/3,r,g,b);drawWave();
-    }
-    cam.raf=requestAnimationFrame(loopCam);
-  }
-  function setQual(cls,txt){$('camQual').className='camqual '+cls;$('camQualT').textContent=txt;}
-  function spread(a){return Math.max.apply(0,a)-Math.min.apply(0,a);}
-  function median(a){if(!a||!a.length)return null;var b=a.slice().sort(function(x,y){return x-y});return b[Math.floor(b.length/2)];}
-  function drawProg(){$('camProg').style.strokeDashoffset=339*(1-Math.min(1,cam.goodMs/cam.needMs));}
-  // 시간이 아니라 "안정 신호가 쌓인 정도"로 진행. 안 잡히면 진행 안 하고 코칭만.
-  function updateCam(meanBr,r,g,b){
-    var now=Date.now(), el=now-cam.t0, dt=cam.lastTs?(now-cam.lastTs):0; cam.lastTs=now;
-    if(dt>500)dt=0; // 탭 전환 등으로 튄 델타 무시
-    // 실시간 진단(디버그용): 지금 카메라가 읽는 색/밝기
-    $('camDiag').textContent='R'+Math.round(r)+' G'+Math.round(g)+' B'+Math.round(b)+' · 밝기'+Math.round(meanBr)+' · R/G'+(g?(r/g).toFixed(2):'-');
-    // 안전 상한: 너무 오래 끌면 종료(안정 신호 있으면 채택, 없으면 실패)
-    if(el>=cam.maxMs){
-      if(cam.hist&&cam.hist.length>=3&&spread(cam.hist)<=10)lockCam();
-      else camFail('신호가 약했어요. 손끝을 렌즈에 완전히 밀착해 다시, 또는 탭 측정');
-      return;
-    }
-    // 1) 커버 판정: 손끝+빛 통과는 "빨강 우세". 빈 화면(R≈G≈B)·얼굴은 배제. 앞카메라 신호는 덜 붉어서 1.25배로 완화
-    var reddish = r>g*1.25 && r>b*1.2 && r>35;
-    var covered = reddish && meanBr>=8 && meanBr<=230;
-    if(!covered){
-      cam.goodMs=Math.max(0,cam.goodMs-dt*2);          // 손가락 없으면 빠르게 되돌림, 절대 완료 안 함
-      cam.hist=[];                                     // 접촉 끊기면 이력 비움(다시 안정화 요구)
-      if(meanBr<9){ setQual('q-bad','너무 눌렸어요'); $('camHint').textContent=cam.torch?'손끝 힘을 살짝 빼세요':'손끝 힘 빼고 폰 밝기 올려요'; }
-      else { setQual('q-bad','손끝이 안 보여요'); $('camHint').textContent='카메라를 손끝으로 완전히 덮어주세요'; }
-      drawProg(); return;
-    }
-    // 2) (접촉 확인됨) 신호/일관성 판정
-    var bpm=null;
-    if(el>3000)bpm=bpmAuto(cam.samples.filter(function(s){return s.t>el-9000}));
-    if(bpm&&bpm>=40&&bpm<=180){cam.lastBpm=bpm;cam.hist=(cam.hist||[]).concat(bpm).slice(-6);$('camBpm').textContent=bpm;}
-    var consistent=cam.hist&&cam.hist.length>=3&&spread(cam.hist)<=8;
-    if(consistent){
-      cam.goodMs+=dt;                       // 안정 신호일 때만 진행
-      setQual('q-good','맥박 잡혀요 ✓'); $('camHint').textContent='좋아요, 그대로 가만히 유지';
-      if(cam.goodMs>=cam.needMs){ drawProg(); lockCam(); return; }  // 완료는 오직 접촉+안정 프레임에서만
-    } else if(bpm){
-      cam.goodMs+=dt*0.15;                  // 감지되나 아직 불안정 — 아주 조금
-      setQual('q-mid','신호 안정화 중…'); $('camHint').textContent='손끝 대고 가만히 기다려요';
-    } else {
-      cam.goodMs=Math.max(0,cam.goodMs-dt*0.25); // 신호 없으면 살짝 되돌림
-      setQual('q-mid', el<7000?'신호 잡는 중…':'신호 약해요');
-      $('camHint').textContent = el<7000?'손끝을 렌즈에 대고 가만히':'손끝 위치를 살짝 조정하세요';
-    }
-    drawProg();
-  }
-  function lockCam(){
-    cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);
-    var bpm=median(cam.hist)||cam.lastBpm; stopStream();$('s-cam').classList.remove('lit');
-    if(!bpm||bpm<40||bpm>180){camFail('신호가 약했어요. 다시 시도하거나 탭 측정');return;}
-    $('camProg').style.strokeDashoffset=0;
-    $('camBpm').textContent=bpm;$('camHint').textContent='측정 완료';$('camSub').textContent='이 값을 안정시심박으로 쓸까요?';
-    setQual('q-good','완료 ✓');
-    var a=$('camAct');a.textContent='이 값 쓰기 ('+bpm+')';a.disabled=false;a.dataset.done='1';a.dataset.bpm=bpm;
-  }
-  function camFail(msg){
-    cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);stopStream();$('s-cam').classList.remove('lit');
-    $('camHint').textContent=msg;var a=$('camAct');a.textContent='다시 시도';a.disabled=false;a.dataset.done='';
-  }
-  function stopStream(){if(cam.stream){cam.stream.getTracks().forEach(function(t){try{t.stop()}catch(e){}});cam.stream=null;}}
-  window.stopCam=function(){cam.running=false;if(cam.raf)cancelAnimationFrame(cam.raf);stopStream();$('s-cam').classList.remove('lit');};
-  function drawWave(){
-    var wc=$('camWave');if(!wc.width)wc.width=wc.clientWidth||400;
-    var c=wc.getContext('2d'),W=wc.width,H=wc.height;c.clearRect(0,0,W,H);
-    var el=Date.now()-cam.t0,pts=cam.samples.filter(function(s){return s.t>el-6000});
-    if(pts.length<3)return;
-    var vs=pts.map(function(p){return p.v}),mn=Math.min.apply(0,vs),mx=Math.max.apply(0,vs),rng=(mx-mn)||1;
-    c.beginPath();c.lineWidth=2.5;c.strokeStyle='#6C7BFF';c.lineJoin='round';
-    for(var i=0;i<pts.length;i++){var x=i/(pts.length-1)*W,y=H-8-((pts[i].v-mn)/rng)*(H-16);i?c.lineTo(x,y):c.moveTo(x,y);}
-    c.stroke();
-  }
-
-  // restore profile if present
-  try{var saved=JSON.parse(localStorage.getItem('z2'));if(saved&&saved.vo2max){P=saved;$('age').value=P.age;$('ageV').textContent=P.age;$('hrrest').value=P.hrrest;}}catch(e){}
+  // init
+  load();
+  if(P){ $('age').value=P.age;$('ageV').textContent=P.age;$('height').value=P.heightCm;$('weight').value=P.weightKg;$('par').value=P.par;$('parV').textContent=PAR_LBL[P.par];
+    $('sexSeg').querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.sex===P.sex);});
+    renderDash();show('dash'); }
 })();
 </script>
