@@ -147,8 +147,8 @@
   <!-- 2. DASH -->
   <section class="screen" id="s-dash">
     <div class="eyebrow">예상 시작 페이스</div>
-    <h1 style="margin-bottom:4px">존2<span class="info-wrap"><button type="button" class="info" onclick="tip(this,event)" aria-label="존2 설명">?</button><span class="tip"><b>존2 = 가장 살이 잘 빠지는 구간</b>이에요. 편하게 대화할 수 있는 낮은 강도로 오래 뛰면, 몸이 지방을 주 연료로 태워요. 그래서 '천천히'가 핵심이에요.</span></span> 목표 페이스<br><span id="dPace" style="color:var(--zone)">–</span> <span class="u" style="font-size:20px;color:var(--mid);font-weight:700">/km</span></h1>
-    <p class="small" style="color:var(--zone);font-weight:700;margin-bottom:14px">느려 보여도 정상이에요 — 존2는 '대화되는 속도'예요.</p>
+    <h1 style="margin-bottom:4px">존2<span class="info-wrap"><button type="button" class="info" onclick="tip(this,event)" aria-label="존2 설명">?</button><span class="tip"><b>존2 = 가장 살이 잘 빠지는 구간</b>이에요. 편하게 대화할 수 있는 낮은 강도로 오래 뛰면, 몸이 지방을 주 연료로 태워요. 그래서 '천천히'가 핵심이에요.</span></span> 목표 페이스<br><span id="dPace" style="color:var(--zone)">-</span> <span class="u" style="font-size:20px;color:var(--mid);font-weight:700">/km</span></h1>
+    <p class="small" id="dSub" style="color:var(--zone);font-weight:700;margin-bottom:14px">느려 보여도 정상이에요. 존2는 '대화되는 속도'예요.</p>
 
     <div class="card">
       <div class="small muted"><b style="color:var(--hi)">존2는 원래 느립니다.</b> 초보는 거의 빠르게 걷듯이 뛰어요. 이건 <b style="color:var(--hi)">추정 시작점</b>이라, 첫 러닝에서 "말 되냐?" 몇 번 물어 <b style="color:var(--hi)">네 진짜 존2 페이스</b>를 찾아요. 뛸수록 정확해져요.</div>
@@ -156,11 +156,11 @@
     </div>
 
     <div class="grid2" style="margin-top:14px">
-      <div class="stat"><div class="k">추정 체력(VO₂max)</div><div class="v" id="dVo2">– <small>ml/kg/min</small></div></div>
+      <div class="stat"><div class="k">추정 체력(VO₂max)</div><div class="v" id="dVo2">- <small>ml/kg/min</small></div></div>
       <div class="stat"><div class="k">누적 러닝</div><div class="v" id="dRuns">0 <small>회</small></div></div>
     </div>
 
-    <p class="note">심박 숫자는 안 보여줍니다. 대신 뛰면서 지킬 수 있는 <b>페이스</b>와 "말 되냐?" 체크로 존2를 안내해요. 의료·진단 목적이 아닙니다.</p>
+    <p class="note">심박 숫자는 안 보여줍니다. 대신 뛰면서 지킬 수 있는 <b>페이스</b>와 "말 되냐?" 체크로 존2를 안내해요. 달릴 땐 폰을 손에 들거나 팔에 차면 "말 체크"를 놓치지 않아요. 의료·진단 목적이 아닙니다.</p>
 
     <div class="dock">
       <button class="btn" onclick="startRun()">러닝 시작</button>
@@ -175,8 +175,8 @@
 
     <div class="hero" style="margin-top:12px">
       <div class="k">목표 존2<span class="info-wrap"><button type="button" class="info" onclick="tip(this,event)" aria-label="존2 설명">?</button><span class="tip" style="left:50%;transform:translateX(-50%)"><b>존2 = 가장 살이 잘 빠지는 구간</b>이에요. 편하게 대화되는 낮은 강도로 오래 뛰면 지방을 주 연료로 태워요. '천천히'가 핵심.</span></span> 페이스</div>
-      <div class="big" style="font-size:40px"><span id="rBand">–</span> <span class="u">/km</span></div>
-      <div class="small muted" style="margin-top:6px">현재 <b id="rPace" style="color:var(--hi)">–:––</b> /km</div>
+      <div class="big" style="font-size:40px"><span id="rBand">-</span> <span class="u">/km</span></div>
+      <div class="small muted" style="margin-top:6px">현재 <b id="rPace" style="color:var(--hi)">-:--</b> /km</div>
     </div>
 
     <div class="gauge">
@@ -184,6 +184,7 @@
       <div class="lbls"><span>느림</span><span style="color:var(--zone)">존2</span><span>빠름</span></div>
     </div>
     <div class="center small muted" style="margin-top:8px" id="rCoach">움직이면 페이스가 잡혀요</div>
+    <div class="center small" id="rHint" style="color:var(--zone);margin-top:6px;display:none"></div>
 
     <div class="grid2" style="margin-top:16px">
       <div class="stat"><div class="k">거리</div><div class="v"><span id="rDist">0.00</span> <small>km</small></div></div>
@@ -215,7 +216,7 @@
     <div class="grid2" style="margin-top:14px">
       <div class="stat"><div class="k">거리</div><div class="v"><span id="sDist">0.00</span> <small>km</small></div></div>
       <div class="stat"><div class="k">시간</div><div class="v" id="sTime">0:00</div></div>
-      <div class="stat"><div class="k">평균 페이스</div><div class="v"><span id="sPace">–</span> <small>/km</small></div></div>
+      <div class="stat"><div class="k">평균 페이스</div><div class="v"><span id="sPace">-</span> <small>/km</small></div></div>
       <div class="stat"><div class="k">칼로리</div><div class="v"><span id="sCal">0</span> <small>kcal</small></div></div>
     </div>
     <div class="card" style="margin-top:14px">
@@ -230,10 +231,10 @@
   <!-- TALK PROMPT OVERLAY -->
   <div class="overlay" id="overlay">
     <div class="prompt">
-      <span class="pill">잠깐, 말 체크</span>
-      <div class="count">1 2 3 … 10</div>
-      <h2>소리 내 열까지 세보세요</h2>
-      <p>한 문장 편하게 말할 수 있나요?<br>이게 존2인지 알려주는 진짜 기준이에요.</p>
+      <span class="pill" id="promptPill">잠깐, 말 체크</span>
+      <div class="count" id="promptCount">1 2 3 … 10</div>
+      <h2 id="promptH">소리 내 열까지 세보세요</h2>
+      <p id="promptP">한 문장 편하게 말할 수 있나요?<br>이게 존2인지 알려주는 진짜 기준이에요.</p>
       <div class="opts">
         <button class="easy" onclick="answerTalk('easy')"><span class="e">😮‍💨</span><span>한 숨에 편하게 셌다</span></button>
         <button class="mid" onclick="answerTalk('mid')"><span class="e">😤</span><span>중간에 숨 쉬어야 했다</span></button>
@@ -249,6 +250,7 @@
   "use strict";
   var $=function(id){return document.getElementById(id)};
   var VO2REST=3.5, ZLO=0.60, ZHI=0.70;
+  var WALK=780;            // 존2 하한이 13:00/km(=780초)보다 느리면 "빠르게 걷기" 영역
   var P=null; // profile
   var prog={vo2maxHistory:[],runs:0};
 
@@ -286,7 +288,8 @@
     v=Math.max(cur*0.92,Math.min(cur*1.04,v));                 // 한 답당: 하향 최대 8%, 상향 최대 4%
     return Math.max(15,Math.min(75,v));
   }
-  function fmtPace(sec){if(!sec||!isFinite(sec)||sec>3600)return "–:––";var m=Math.floor(sec/60),s=Math.round(sec%60);if(s===60){m++;s=0;}return m+":"+(s<10?"0":"")+s;}
+  function fmtPace(sec){if(!sec||!isFinite(sec)||sec>3600)return "-:--";var m=Math.floor(sec/60),s=Math.round(sec%60);if(s===60){m++;s=0;}return m+":"+(s<10?"0":"")+s;}
+  function fmtBand(b){return fmtPace(b.fast)+"~"+fmtPace(b.slow);}
   function fmtClock(s){var m=Math.floor(s/60);return m+":"+((s%60)<10?"0":"")+(s%60);}
   function zoneOfR(r){if(r<ZLO)return"slow";if(r>ZHI)return"fast";return"zone";}
   var Z={zone:{t:"존2 유지 중",c:"is-zone"},slow:{t:"조금 올려도 돼",c:"is-slow"},fast:{t:"조금 늦춰",c:"is-fast"}};
@@ -315,7 +318,9 @@
 
   function renderDash(){
     var b=bandFor(0,P.vo2max);
-    $('dPace').textContent=fmtPace(b.fast)+"–"+fmtPace(b.slow);
+    $('dPace').textContent=fmtBand(b);
+    $('dSub').textContent = b.slow>WALK ? '이 페이스는 빠르게 걷기부터 시작해도 좋아요. 존2는 속도가 아니라 강도예요.'
+                                        : "느려 보여도 정상이에요. 존2는 '대화되는 속도'예요.";
     $('dVo2').innerHTML=Math.round(P.vo2max)+' <small>ml/kg/min</small>';
     $('dRuns').innerHTML=prog.runs+' <small>회</small>';
     drawSpark($('dSpark'));
@@ -331,10 +336,19 @@
   // ---------- run ----------
   var run=null;
   function startRun(){
+    if(!P){show('onboard');return;}   // 프로필 없이 러닝 진입 방지(직접 URL 등)
     run={pts:[],dist:0,t0:Date.now(),paused:false,secTot:0,secZone:0,pace:0,grade:0,lastFix:null,watch:null,tick:null,demo:false,
-         _lastPromptSec:0,checks:0,promptOpen:false,curR:0,firstBand:bandFor(0,P.vo2max),intenseSum:0,intenseN:0,kcal:0,vo2maxAtStart:P.vo2max};
+         _lastPromptSec:0,checks:0,promptsFired:0,missed:0,promptOpen:false,recovering:false,_lastMissedPace:0,curR:0,
+         firstBand:bandFor(0,P.vo2max),intenseSum:0,intenseN:0,kcal:0,vo2maxAtStart:P.vo2max};
+    unlockAudio();       // 러닝 시작 탭 = 사용자 제스처 → iOS 오디오 잠금 해제
+    resetPromptText();
     show('run');$('rPause').textContent='일시정지';$('rCal').textContent=0;$('rPct').textContent=0;$('rDist').textContent='0.00';$('rTime').textContent='0:00';$('rLine').setAttribute('points','');
     updateBandUI();
+    var walk=bandFor(0,P.vo2max).slow>WALK;           // 초저체력: 러닝 화면에서도 "걷기 수준" 안심 카피
+    $('rHint').style.display=walk?'block':'none';
+    if(walk)$('rHint').textContent='존2는 빠르게 걷기 수준부터예요. 느린 게 정상이에요.';
+    clearTimeout(run._hintT);
+    run._hintT=setTimeout(function(){toast('폰을 손에 들거나 팔에 차면 "말 체크"를 놓치지 않아요.');},1200);
     if(!navigator.geolocation){return startDemo();}
     $('runState').textContent='GPS 연결 중…';
     run.watch=navigator.geolocation.watchPosition(onFix,function(){startDemo();},{enableHighAccuracy:true,maximumAge:1000,timeout:9000});
@@ -353,7 +367,7 @@
     if(win.length>=2){var dd=0;for(var i=1;i<win.length;i++)dd+=haversine(win[i-1],win[i]);var dt=(win[win.length-1].t-win[0].t)/1000;if(dd>3&&dt>0)run.pace=1000/(dd/dt);else run.pace=0;}
   }
   function startDemo(){
-    if(run.demo)return;run.demo=true;$('runState').textContent='미리보기 · 실제로 뛰면 GPS로 기록돼요 (지금은 자동 시연)';
+    if(run.demo)return;run.demo=true;$('runState').textContent='미리보기 · 실내(GPS 없음)라 기록은 저장되지 않아요';
     if(run.watch){navigator.geolocation.clearWatch(run.watch);run.watch=null;}
     if(!run.tick)run.tick=setInterval(loopRun,1000);
     // 초반 빠르게 출발 → 프롬프트/교정 시연되게. 존2 근처를 오가되 살짝 빠른 쪽.
@@ -368,7 +382,7 @@
     };
   }
   function loopRun(){
-    if(!run||run.paused||run.promptOpen)return;
+    if(!run||run.paused)return;                 // 프롬프트가 떠 있어도 러닝 타이머·거리는 계속(코칭만 오버레이)
     if(run.demo&&run._demo)run._demo();
     run.secTot++;
     if(run.pace){
@@ -384,7 +398,7 @@
     maybePrompt();
   }
   function renderRun(){
-    $('rPace').textContent=run.pace?fmtPace(run.pace):'–:––';
+    $('rPace').textContent=run.pace?fmtPace(run.pace):'-:--';
     $('rDist').textContent=(run.dist/1000).toFixed(2);
     $('rTime').textContent=fmtClock(run.secTot);
     $('rPct').textContent=run.secTot?Math.round(run.secZone/run.secTot*100):0;
@@ -393,11 +407,12 @@
       var z=zoneOfR(run.curR);
       $('rMk').style.left=markPos(run.curR)+"%";
       $('rStat').className='status '+Z[z].c;$('rStat').lastChild.textContent=Z[z].t;
-      $('rCoach').textContent=z==='zone'?'좋아요. 이 리듬 유지하세요.':z==='slow'?'편하면 조금 올려도 돼요.':'조금 늦춰도 괜찮아요 — 존2는 대화되는 속도예요.';
+      var walk=bandFor(0,P.vo2max).slow>WALK;
+      $('rCoach').textContent=z==='zone'?'좋아요. 이 리듬 유지하세요.':z==='slow'?'편하면 조금 올려도 돼요.':(walk?'존2는 빠르게 걷기 수준이에요. 뛰지 말고 빠른 걷기로 낮춰도 좋아요.':'조금 늦춰도 괜찮아요. 존2는 대화되는 속도예요.');
     }
     updateBandUI();
   }
-  function updateBandUI(){var b=bandFor(run?run.grade:0,P.vo2max);$('rBand').textContent=fmtPace(b.fast)+"–"+fmtPace(b.slow);}
+  function updateBandUI(){var b=bandFor(run?run.grade:0,P.vo2max);$('rBand').textContent=fmtBand(b);}
 
   function maybePrompt(){
     if(run.promptOpen)return;
@@ -406,37 +421,77 @@
     if(run.curR>0.73 || gap>=300){ askTalk(false); }   // 존2 위로 드리프트(73%↑) 또는 5분 경과
   }
 
+  function resetPromptText(){
+    $('promptPill').textContent='잠깐, 말 체크';
+    $('promptCount').style.display='';
+    $('promptH').textContent='소리 내 열까지 세보세요';
+    $('promptP').innerHTML='한 문장 편하게 말할 수 있나요?<br>이게 존2인지 알려주는 진짜 기준이에요.';
+  }
   window.askTalk=function(manual){
     if(!run||run.promptOpen)return;
-    run.promptOpen=true;run._lastPromptSec=run.secTot;
+    resetPromptText();
+    run.promptOpen=true;run._lastPromptSec=run.secTot;run.recovering=false;
+    if(!manual)run.promptsFired++;
+    run._promptPace=run.pace;                   // 이 시점 페이스 보관(놓침 회수용)
     $('overlay').classList.add('on');
     try{navigator.vibrate&&navigator.vibrate([120,60,120]);}catch(e){}
     beep();
+    clearTimeout(run._ptimer);
+    run._ptimer=setTimeout(function(){          // 45초 무응답 = 놓침(폰 주머니 등) → 오버레이 닫고 러닝 계속
+      if(run&&run.promptOpen&&!run.recovering){run.missed++;if(run._promptPace)run._lastMissedPace=run._promptPace;
+        $('overlay').classList.remove('on');run.promptOpen=false;}
+    },45000);
   };
+
+  function showRecovery(){                        // 종료 시, 한 번도 못 답한 러닝에서 마지막 페이스로 1회 회수
+    resetPromptText();
+    run.recovering=true;run.promptOpen=true;
+    $('promptPill').textContent='마지막 한 가지';
+    $('promptCount').style.display='none';
+    $('promptH').textContent='아까 그 페이스, 편했나요?';
+    $('promptP').innerHTML='달리는 동안 "말 체크"에 답을 못 받았어요.<br>마지막에 뛰던 그 느낌으로 하나만 골라주세요.';
+    $('overlay').classList.add('on');
+    beep();
+    clearTimeout(run._ptimer);
+    run._ptimer=setTimeout(function(){        // 회수도 무응답이면 교정 없이 요약으로(영구 hang 방지)
+      if(run&&run.recovering){run.recovering=false;run.promptOpen=false;$('overlay').classList.remove('on');finalizeSummary();}
+    },40000);
+  }
+
   window.answerTalk=function(resp){
     if(!run)return;
+    clearTimeout(run._ptimer);
+    var recovering=run.recovering;
+    var paceUsed = recovering ? run._lastMissedPace : run.pace;
+    $('overlay').classList.remove('on');run.promptOpen=false;run.recovering=false;
+    if(run.demo && !recovering){                 // 미리보기: 가짜 페이스라 교정을 프로필에 반영하지 않음
+      run.checks++;
+      toast('미리보기라 교정은 저장 안 해요. 야외에서 GPS로 뛰면 네 존2를 찾아줘요.');
+      return;
+    }
     run.checks++;
     var slowBefore=bandFor(0,P.vo2max).slow, gamed=false;
-    if(run.pace){
-      gamed = resp==='easy' && implausibleEasy(run.pace,run.grade,P.vo2max); // 고강도인데 easy = 게이밍/오답
-      P.vo2max = seekVo2(P.vo2max, run.pace, run.grade, resp);
+    if(paceUsed){
+      gamed = resp==='easy' && implausibleEasy(paceUsed,run.grade,P.vo2max); // 고강도인데 easy = 게이밍/오답
+      P.vo2max = seekVo2(P.vo2max, paceUsed, run.grade, resp);
       // 러닝당 상향 캡: 체력은 한 러닝 안에 안 오름 → 시작 대비 +5% 초과 상향 금지(하향은 무제한, 안전)
       P.vo2max = Math.max(15, Math.min(75, Math.min(P.vo2max, run.vo2maxAtStart*1.05)));
     }
-    run.promptLog=run.promptLog||[];run.promptLog.push({t:run.secTot,paceS:run.pace,resp:resp});
+    run.promptLog=run.promptLog||[];run.promptLog.push({t:run.secTot,paceS:paceUsed,resp:resp});
     save();updateBandUI();
-    $('overlay').classList.remove('on');run.promptOpen=false;
+    if(recovering){finalizeSummary();return;}    // 회수 답변이면 바로 요약으로
     var b=bandFor(0,P.vo2max), d=b.slow-slowBefore;
-    var msg = gamed ? '지금은 이미 꽤 힘든 페이스예요 — 존2는 편하게 대화되는 강도랍니다'
-            : d>4 ? '알겠어, 목표를 조금 늦출게 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
-            : d<-4 ? '여유 있네, 목표 페이스 조정 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
+    var msg = gamed ? '지금은 이미 꽤 힘든 페이스예요. 존2는 편하게 대화되는 강도랍니다'
+            : d>4 ? '알겠어, 목표를 조금 늦출게 → '+fmtBand(b)
+            : d<-4 ? '여유 있네, 목표 페이스 조정 → '+fmtBand(b)
             : '딱 좋아, 그대로 유지';
     toast(msg);
   };
 
   function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2600);}
   var actx=null;
-  function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  function unlockAudio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();}catch(e){}}
+  function beep(){try{if(!actx)return;if(actx.state==='suspended')actx.resume();
     [0,240].forEach(function(delay){setTimeout(function(){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.frequency.value=880;g.gain.value=0.09;o.start();setTimeout(function(){o.stop();},160);},delay);});
   }catch(e){}}
 
@@ -446,34 +501,63 @@
     else{var la=pts.map(function(p){return p.lat}),lo=pts.map(function(p){return p.lng});var laMin=Math.min.apply(0,la),laMax=Math.max.apply(0,la),loMin=Math.min.apply(0,lo),loMax=Math.max.apply(0,lo);var sLa=(laMax-laMin)||1e-6,sLo=(loMax-loMin)||1e-6,pad=14;s=pts.map(function(p){var x=pad+(p.lng-loMin)/sLo*(300-2*pad);var y=170-pad-(p.lat-laMin)/sLa*(170-2*pad);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');}
     el.setAttribute('points',s);
   }
-  window.pauseRun=function(){run.paused=!run.paused;$('rPause').textContent=run.paused?'재개':'일시정지';$('runState').textContent=run.paused?'일시정지됨':'추적 중';};
+  window.pauseRun=function(){
+    if(run.promptOpen&&!run.recovering){run.missed++;if(run._promptPace)run._lastMissedPace=run._promptPace;$('overlay').classList.remove('on');run.promptOpen=false;clearTimeout(run._ptimer);}  // 프롬프트+일시정지 공존 방지 + 놓침 기록(회수 트리거 유지)
+    run.paused=!run.paused;$('rPause').textContent=run.paused?'재개':'일시정지';$('runState').textContent=run.paused?'일시정지됨':(run.demo?'미리보기 · 실내(GPS 없음)':'추적 중');};
+
   window.stopRun=function(){
-    if(run.watch)navigator.geolocation.clearWatch(run.watch);if(run.tick)clearInterval(run.tick);
+    if(run._stopping)return; run._stopping=true;                  // 재진입 차단(더블탭·회수 중 재종료 → 이중 적재 방지)
+    if(run.promptOpen && !run.recovering){                        // 프롬프트 열린 채 종료 → 그 시도를 놓침으로 회수 대상에 포함
+      run.missed++; if(run._promptPace)run._lastMissedPace=run._promptPace;
+      $('overlay').classList.remove('on'); run.promptOpen=false;
+    }
+    clearTimeout(run._ptimer);clearTimeout(run._hintT);
+    if(run.watch)navigator.geolocation.clearWatch(run.watch);if(run.tick){clearInterval(run.tick);run.tick=null;}
+    // 놓친 체크 회수: 실제(비데모) 러닝인데 한 번도 못 답했고 프롬프트는 떴다면 마지막 페이스로 1회 회수
+    if(!run.demo && run.checks===0 && run.promptsFired>0 && run._lastMissedPace){
+      showRecovery();return;   // 답하면 finalizeSummary로 이어짐(_stopping 유지=재종료 무시)
+    }
+    finalizeSummary();
+  };
+
+  function finalizeSummary(){
+    if(run.promptOpen){$('overlay').classList.remove('on');run.promptOpen=false;}
+    var pct=run.secTot?Math.round(run.secZone/run.secTot*100):0;
+    var nb=bandFor(0,P.vo2max);
+    if(run.demo){                                // 미리보기: 가짜 데이터는 저장·집계하지 않음
+      $('sHead').textContent='미리보기 러닝';
+      $('sHeroLabel').textContent='찾은 존2 페이스(추정)';
+      $('sHeroBig').innerHTML=fmtBand(nb)+'<span class="u"> /km</span>';
+      $('sBandMsg').textContent='실내·GPS 없이는 거리·경로·칼로리가 기록되지 않아요. 야외에서 GPS로 뛰면 자동 저장되고 네 존2도 정확히 맞춰져요.';
+      $('sDist').textContent='-';$('sPace').textContent='-';$('sCal').textContent='-';
+      $('sTime').textContent=fmtClock(run.secTot);
+      $('sRoute').innerHTML='<div class="small muted" style="padding:56px 12px;text-align:center">실내 미리보기라 경로 기록이 없어요</div>';
+      show('sum');return;
+    }
     prog.runs++;prog.vo2maxHistory.push({t:Date.now(),vo2max:P.vo2max});if(prog.vo2maxHistory.length>60)prog.vo2maxHistory.shift();save();
     $('sDist').textContent=(run.dist/1000).toFixed(2);
     $('sTime').textContent=fmtClock(run.secTot);
-    var avg=run.dist>50?(run.secTot/(run.dist/1000)):0;$('sPace').textContent=avg?fmtPace(avg):'–';
-    var pct=run.secTot?Math.round(run.secZone/run.secTot*100):0;
+    var avg=run.dist>50?(run.secTot/(run.dist/1000)):0;$('sPace').textContent=avg?fmtPace(avg):'-';
     $('sCal').textContent=Math.round(run.kcal);
-    var nb=bandFor(0,P.vo2max), delta=Math.round((run.firstBand.slow - nb.slow));
+    var delta=Math.round((run.firstBand.slow - nb.slow));
     if(prog.runs<=1){
       // 첫 러닝: 유지율(초보는 낮게 나와 실패감) 대신 "찾은 존2 페이스"를 주인공으로
-      $('sHead').textContent='첫 존2 러닝 완료 🎉';
+      $('sHead').textContent='첫 존2 러닝 완료';
       $('sHeroLabel').textContent='찾은 네 존2 페이스';
-      $('sHeroBig').innerHTML=fmtPace(nb.fast)+'–'+fmtPace(nb.slow)+'<span class="u"> /km</span>';
-      $('sBandMsg').textContent = run.checks ? '오늘은 네 존2를 찾는 날이었어요. 존2 안에 머문 비율은 '+pct+'% — 이건 다음 러닝부터 천천히 올리면 돼요.' : '다음엔 "말 체크"에 답하면 네 존2를 더 정확히 찾아줘요.';
+      $('sHeroBig').innerHTML=fmtBand(nb)+'<span class="u"> /km</span>';
+      $('sBandMsg').textContent = run.checks ? '오늘은 네 존2를 찾는 날이었어요. 존2 안에 머문 비율은 '+pct+'% 였고, 이건 다음 러닝부터 천천히 올리면 돼요.' : '다음엔 "말 체크"에 답하면 네 존2를 더 정확히 찾아줘요.';
     } else {
       $('sHead').textContent='수고했어요';
       $('sHeroLabel').textContent='존2 유지율';
       $('sHeroBig').innerHTML='<span>'+pct+'</span><span class="u"> %</span>';
       $('sBandMsg').textContent = delta>3 ? '네 존2 페이스가 이번에 '+delta+'초/km 빨라졌어요 (같은 편함인데 더 빨리!).'
-        : delta<-3 ? '네 존2를 조금 더 천천히로 맞췄어요 — 느린 게 진짜 실력을 키워요.'
+        : delta<-3 ? '네 존2를 조금 더 천천히로 맞췄어요. 느린 게 진짜 실력을 키워요.'
         : '네 존2 페이스가 안정적으로 자리잡고 있어요.';
     }
     var line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('fill','none');line.setAttribute('stroke','var(--zone)');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linejoin','round');
     $('sRoute').innerHTML='';$('sRoute').appendChild(line);drawRoute(line,run.pts,run.demo);
     show('sum');
-  };
+  }
 
   // init
   load();
