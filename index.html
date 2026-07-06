@@ -270,13 +270,20 @@
   // target %VO2R -> pace(sec/km) at grade
   function paceForR(r,gPct,vo2max){var vo2=VO2REST+r*(vo2max-VO2REST);var g=gradeEff(gPct/100);var spd=(vo2-VO2REST)/(0.2+0.9*g);if(spd<=0)return 0;return (1000/spd)*60;}
   function bandFor(gPct,vo2max){return {fast:paceForR(ZHI,gPct,vo2max), slow:paceForR(ZLO,gPct,vo2max)};}
-  // 답이 가리키는 목표강도로 vo2max를 lr만큼 끌어당김(±8% 이상치 캡)
-  function seekVo2(cur,paceS,gPct,resp,lr){
+  // 게이밍 방어: 자기신고가 생리학을 못 이기게. 헐떡=빠르게 하향(안전), 편함=천천히 상향
+  function implausibleEasy(paceS,gPct,cur){var spd=1000/(paceS/60),g=gradeEff(gPct/100),vo2P=0.2*spd+0.9*spd*g+VO2REST;return (vo2P-VO2REST)/(cur-VO2REST)>0.82;}
+  function seekVo2(cur,paceS,gPct,resp){
     var spd=1000/(paceS/60), g=gradeEff(gPct/100), vo2P=0.2*spd+0.9*spd*g+VO2REST;
-    var tgt=resp==='hard'?0.80:resp==='easy'?0.58:0.70;
+    var curInt=(vo2P-VO2REST)/(cur-VO2REST);   // 현재 강도(%VO2R)
+    var tgt, lr;
+    if(resp==='hard'){ tgt=0.80; lr=0.34; }                    // 헐떡 → 빠르게 하향(안전 우선, 무조건 신뢰)
+    else if(resp==='easy'){
+      if(curInt>0.82){ tgt=0.72; lr=0.08; }                    // 이미 고강도인데 easy = 생리학상 불가 → 거의 안 올림
+      else { tgt=0.58; lr=0.15; }                              // 정당한 여유 → 천천히만 상향
+    } else { tgt=0.70; lr=0.30; }                              // 애매 = 임계
     var Vneed=VO2REST+(vo2P-VO2REST)/tgt;
     var v=cur*(1-lr)+Vneed*lr;
-    v=Math.max(cur*0.92,Math.min(cur*1.08,v));
+    v=Math.max(cur*0.92,Math.min(cur*1.04,v));                 // 한 답당: 하향 최대 8%, 상향 최대 4%
     return Math.max(15,Math.min(75,v));
   }
   function fmtPace(sec){if(!sec||!isFinite(sec)||sec>3600)return "–:––";var m=Math.floor(sec/60),s=Math.round(sec%60);if(s===60){m++;s=0;}return m+":"+(s<10?"0":"")+s;}
@@ -325,7 +332,7 @@
   var run=null;
   function startRun(){
     run={pts:[],dist:0,t0:Date.now(),paused:false,secTot:0,secZone:0,pace:0,grade:0,lastFix:null,watch:null,tick:null,demo:false,
-         _lastPromptSec:0,checks:0,promptOpen:false,curR:0,firstBand:bandFor(0,P.vo2max),intenseSum:0,intenseN:0,kcal:0};
+         _lastPromptSec:0,checks:0,promptOpen:false,curR:0,firstBand:bandFor(0,P.vo2max),intenseSum:0,intenseN:0,kcal:0,vo2maxAtStart:P.vo2max};
     show('run');$('rPause').textContent='일시정지';$('rCal').textContent=0;$('rPct').textContent=0;$('rDist').textContent='0.00';$('rTime').textContent='0:00';$('rLine').setAttribute('points','');
     updateBandUI();
     if(!navigator.geolocation){return startDemo();}
@@ -409,16 +416,19 @@
   window.answerTalk=function(resp){
     if(!run)return;
     run.checks++;
-    var slowBefore=bandFor(0,P.vo2max).slow;
+    var slowBefore=bandFor(0,P.vo2max).slow, gamed=false;
     if(run.pace){
-      // 답이 가리키는 목표강도로 끌어당김 + ±8% 캡(이상치 방어). 단일러닝 드리프트는 캡이 흡수(시뮬 검증)
-      P.vo2max = seekVo2(P.vo2max, run.pace, run.grade, resp, 0.34);
+      gamed = resp==='easy' && implausibleEasy(run.pace,run.grade,P.vo2max); // 고강도인데 easy = 게이밍/오답
+      P.vo2max = seekVo2(P.vo2max, run.pace, run.grade, resp);
+      // 러닝당 상향 캡: 체력은 한 러닝 안에 안 오름 → 시작 대비 +5% 초과 상향 금지(하향은 무제한, 안전)
+      P.vo2max = Math.max(15, Math.min(75, Math.min(P.vo2max, run.vo2maxAtStart*1.05)));
     }
     run.promptLog=run.promptLog||[];run.promptLog.push({t:run.secTot,paceS:run.pace,resp:resp});
     save();updateBandUI();
     $('overlay').classList.remove('on');run.promptOpen=false;
     var b=bandFor(0,P.vo2max), d=b.slow-slowBefore;
-    var msg = d>4 ? '알겠어, 목표를 조금 늦출게 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
+    var msg = gamed ? '지금은 이미 꽤 힘든 페이스예요 — 존2는 편하게 대화되는 강도랍니다'
+            : d>4 ? '알겠어, 목표를 조금 늦출게 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
             : d<-4 ? '여유 있네, 목표 페이스 조정 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
             : '딱 좋아, 그대로 유지';
     toast(msg);
