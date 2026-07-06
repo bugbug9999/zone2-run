@@ -135,10 +135,11 @@
   <!-- 2. DASH -->
   <section class="screen" id="s-dash">
     <div class="eyebrow">예상 시작 페이스</div>
-    <h1 style="margin-bottom:12px">존2 목표 페이스<br><span id="dPace" style="color:var(--zone)">–</span> <span class="u" style="font-size:20px;color:var(--mid);font-weight:700">/km</span></h1>
+    <h1 style="margin-bottom:4px">존2 목표 페이스<br><span id="dPace" style="color:var(--zone)">–</span> <span class="u" style="font-size:20px;color:var(--mid);font-weight:700">/km</span></h1>
+    <p class="small" style="color:var(--zone);font-weight:700;margin-bottom:14px">느려 보여도 정상이에요 — 존2는 '대화되는 속도'예요.</p>
 
     <div class="card">
-      <div class="small muted">이건 <b style="color:var(--hi)">추정 시작점</b>이에요. 첫 러닝에서 "말 되냐?" 몇 번 물어 <b style="color:var(--hi)">네 진짜 존2 페이스</b>를 찾습니다. 뛸수록 정확해져요.</div>
+      <div class="small muted"><b style="color:var(--hi)">존2는 원래 느립니다.</b> 초보는 거의 빠르게 걷듯이 뛰어요. 이건 <b style="color:var(--hi)">추정 시작점</b>이라, 첫 러닝에서 "말 되냐?" 몇 번 물어 <b style="color:var(--hi)">네 진짜 존2 페이스</b>를 찾아요. 뛸수록 정확해져요.</div>
       <div id="dSpark" style="margin-top:12px"></div>
     </div>
 
@@ -195,8 +196,8 @@
     <div class="eyebrow">러닝 완료</div>
     <h1 style="margin-bottom:12px" id="sHead">수고했어요</h1>
     <div class="card center">
-      <div class="k small muted" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700">존2 유지율</div>
-      <div class="big" style="color:var(--zone)"><span id="sPct">0</span><span class="u"> %</span></div>
+      <div class="k small muted" id="sHeroLabel" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700">존2 유지율</div>
+      <div class="big" style="color:var(--zone)" id="sHeroBig"><span id="sPct">0</span><span class="u"> %</span></div>
       <div class="small muted" id="sBandMsg" style="margin-top:6px"></div>
     </div>
     <div class="grid2" style="margin-top:14px">
@@ -272,7 +273,7 @@
   function save(){try{localStorage.setItem('z2v2_profile',JSON.stringify(P));localStorage.setItem('z2v2_progress',JSON.stringify(prog));}catch(e){}}
   function load(){try{var p=JSON.parse(localStorage.getItem('z2v2_profile'));if(p&&p.vo2max)P=p;var g=JSON.parse(localStorage.getItem('z2v2_progress'));if(g)prog=g;}catch(e){}}
 
-  var PAR_LBL=['거의 안 움직임','아주 가끔','가벼움','주 1~2회','주 2~3회','주 3~4회','주 4~5회','거의 매일 고강도'];
+  var PAR_LBL=['거의 안 움직임','한 달에 몇 번','주 1회 정도','주 1~2회','주 2~3회','주 3~4회','주 4~5회','거의 매일 고강도'];
   $('age').addEventListener('input',function(){$('ageV').textContent=this.value});
   $('par').addEventListener('input',function(){$('parV').textContent=PAR_LBL[this.value]});
   $('sexSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;this.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');});
@@ -327,7 +328,7 @@
     if(win.length>=2){var dd=0;for(var i=1;i<win.length;i++)dd+=haversine(win[i-1],win[i]);var dt=(win[win.length-1].t-win[0].t)/1000;if(dd>3&&dt>0)run.pace=1000/(dd/dt);else run.pace=0;}
   }
   function startDemo(){
-    if(run.demo)return;run.demo=true;$('runState').textContent='데모 모드 · GPS 권한 없어 자동 페이스로 시연';
+    if(run.demo)return;run.demo=true;$('runState').textContent='미리보기 · 실제로 뛰면 GPS로 기록돼요 (지금은 자동 시연)';
     if(run.watch){navigator.geolocation.clearWatch(run.watch);run.watch=null;}
     if(!run.tick)run.tick=setInterval(loopRun,1000);
     // 초반 빠르게 출발 → 프롬프트/교정 시연되게. 존2 근처를 오가되 살짝 빠른 쪽.
@@ -364,7 +365,7 @@
       var z=zoneOfR(run.curR);
       $('rMk').style.left=markPos(run.curR)+"%";
       $('rStat').className='status '+Z[z].c;$('rStat').lastChild.textContent=Z[z].t;
-      $('rCoach').textContent=z==='zone'?'좋아요. 이 리듬 유지하세요.':z==='slow'?'편하면 조금 올려도 돼요.':'숨이 편해지게 조금 늦추세요.';
+      $('rCoach').textContent=z==='zone'?'좋아요. 이 리듬 유지하세요.':z==='slow'?'편하면 조금 올려도 돼요.':'조금 늦춰도 괜찮아요 — 존2는 대화되는 속도예요.';
     }
     updateBandUI();
   }
@@ -405,7 +406,9 @@
 
   function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2600);}
   var actx=null;
-  function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.frequency.value=880;g.gain.value=0.06;o.start();setTimeout(function(){o.stop();},160);}catch(e){}}
+  function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    [0,240].forEach(function(delay){setTimeout(function(){var o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.frequency.value=880;g.gain.value=0.09;o.start();setTimeout(function(){o.stop();},160);},delay);});
+  }catch(e){}}
 
   function drawRoute(el,pts,demo){
     if(pts.length<2)return;var s;
@@ -420,15 +423,23 @@
     $('sDist').textContent=(run.dist/1000).toFixed(2);
     $('sTime').textContent=fmtClock(run.secTot);
     var avg=run.dist>50?(run.secTot/(run.dist/1000)):0;$('sPace').textContent=avg?fmtPace(avg):'–';
-    $('sPct').textContent=run.secTot?Math.round(run.secZone/run.secTot*100):0;
+    var pct=run.secTot?Math.round(run.secZone/run.secTot*100):0;
     $('sChecks').textContent=run.checks;
-    // 밴드 변화 메시지
     var nb=bandFor(0,P.vo2max), delta=Math.round((run.firstBand.slow - nb.slow));
-    var bm = run.checks===0 ? '다음엔 "말 체크"에 답하면 네 존2가 더 정확해져요.'
-           : delta>3 ? '네 존2 페이스가 이번에 '+delta+'초/km 빨라졌어요 (더 편하게 느껴짐).'
-           : delta<-3 ? '네 존2를 조금 더 천천히로 맞췄어요. 그게 진짜 easy예요.'
-           : '네 존2 페이스가 안정적으로 자리잡고 있어요.';
-    $('sBandMsg').textContent=bm;
+    if(prog.runs<=1){
+      // 첫 러닝: 유지율(초보는 낮게 나와 실패감) 대신 "찾은 존2 페이스"를 주인공으로
+      $('sHead').textContent='첫 존2 러닝 완료 🎉';
+      $('sHeroLabel').textContent='찾은 네 존2 페이스';
+      $('sHeroBig').innerHTML=fmtPace(nb.fast)+'–'+fmtPace(nb.slow)+'<span class="u"> /km</span>';
+      $('sBandMsg').textContent = run.checks ? '오늘은 네 존2를 찾는 날이었어요. 존2 안에 머문 비율은 '+pct+'% — 이건 다음 러닝부터 천천히 올리면 돼요.' : '다음엔 "말 체크"에 답하면 네 존2를 더 정확히 찾아줘요.';
+    } else {
+      $('sHead').textContent='수고했어요';
+      $('sHeroLabel').textContent='존2 유지율';
+      $('sHeroBig').innerHTML='<span>'+pct+'</span><span class="u"> %</span>';
+      $('sBandMsg').textContent = delta>3 ? '네 존2 페이스가 이번에 '+delta+'초/km 빨라졌어요 (같은 편함인데 더 빨리!).'
+        : delta<-3 ? '네 존2를 조금 더 천천히로 맞췄어요 — 느린 게 진짜 실력을 키워요.'
+        : '네 존2 페이스가 안정적으로 자리잡고 있어요.';
+    }
     var line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('fill','none');line.setAttribute('stroke','var(--zone)');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linejoin','round');
     $('sRoute').innerHTML='';$('sRoute').appendChild(line);drawRoute(line,run.pts,run.demo);
     show('sum');
