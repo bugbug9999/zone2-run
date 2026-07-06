@@ -252,6 +252,15 @@
   // target %VO2R -> pace(sec/km) at grade
   function paceForR(r,gPct,vo2max){var vo2=VO2REST+r*(vo2max-VO2REST);var g=gradeEff(gPct/100);var spd=(vo2-VO2REST)/(0.2+0.9*g);if(spd<=0)return 0;return (1000/spd)*60;}
   function bandFor(gPct,vo2max){return {fast:paceForR(ZHI,gPct,vo2max), slow:paceForR(ZLO,gPct,vo2max)};}
+  // 답이 가리키는 목표강도로 vo2max를 lr만큼 끌어당김(±8% 이상치 캡)
+  function seekVo2(cur,paceS,gPct,resp,lr){
+    var spd=1000/(paceS/60), g=gradeEff(gPct/100), vo2P=0.2*spd+0.9*spd*g+VO2REST;
+    var tgt=resp==='hard'?0.80:resp==='easy'?0.58:0.70;
+    var Vneed=VO2REST+(vo2P-VO2REST)/tgt;
+    var v=cur*(1-lr)+Vneed*lr;
+    v=Math.max(cur*0.92,Math.min(cur*1.08,v));
+    return Math.max(15,Math.min(75,v));
+  }
   function fmtPace(sec){if(!sec||!isFinite(sec)||sec>3600)return "–:––";var m=Math.floor(sec/60),s=Math.round(sec%60);if(s===60){m++;s=0;}return m+":"+(s<10?"0":"")+s;}
   function fmtClock(s){var m=Math.floor(s/60);return m+":"+((s%60)<10?"0":"")+(s%60);}
   function zoneOfR(r){if(r<ZLO)return"slow";if(r>ZHI)return"fast";return"zone";}
@@ -380,12 +389,8 @@
     run.checks++;
     var slowBefore=bandFor(0,P.vo2max).slow;
     if(run.pace){
-      // 답이 가리키는 목표강도로 개인 VO2max를 부드럽게 끌어당김(모든 답이 정보. 중간=존2 상단=임계)
-      var spd=1000/(run.pace/60), g=gradeEff(run.grade/100);
-      var vo2P=0.2*spd+0.9*spd*g+VO2REST;
-      var tgt = resp==='hard'?0.80 : resp==='easy'?0.58 : 0.70;
-      var Vneed=VO2REST+(vo2P-VO2REST)/tgt;
-      P.vo2max=Math.max(15,Math.min(75, P.vo2max*0.66 + Vneed*0.34));
+      // 답이 가리키는 목표강도로 끌어당김 + ±8% 캡(이상치 방어). 단일러닝 드리프트는 캡이 흡수(시뮬 검증)
+      P.vo2max = seekVo2(P.vo2max, run.pace, run.grade, resp, 0.34);
     }
     run.promptLog=run.promptLog||[];run.promptLog.push({t:run.secTot,paceS:run.pace,resp:resp});
     save();updateBandUI();
