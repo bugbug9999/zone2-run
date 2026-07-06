@@ -35,8 +35,10 @@
   input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--hi);outline-offset:2px}
   .numrow{display:flex;gap:10px}
   .numrow .field{flex:1;margin-top:18px}
-  input[type=number]{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--hi);font-size:22px;font-weight:800;padding:11px 12px;border-radius:12px;margin-top:8px;font-variant-numeric:tabular-nums}
-  input[type=number]:focus{outline:2px solid var(--accent);border-color:transparent}
+  input[type=number],input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--hi);font-size:22px;font-weight:800;padding:11px 12px;border-radius:12px;margin-top:8px;font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none}
+  input[type=number]:focus,input[type=text]:focus{outline:2px solid var(--accent);border-color:transparent}
+  input#knownPace{font-size:17px;font-weight:700}
+  input::placeholder{color:var(--low);font-weight:600}
 
   .seg{display:flex;gap:8px;margin-top:8px}
   .seg button{flex:1;background:var(--surface2);border:1px solid var(--line);color:var(--mid);font-weight:800;font-size:15px;padding:11px;border-radius:12px;cursor:pointer}
@@ -127,10 +129,14 @@
         <label class="field"><span class="l">몸무게 (kg)</span><input type="number" id="weight" value="60" min="35" max="150" inputmode="numeric"></label>
       </div>
       <label class="field">
-        <span class="l">평소 활동량 <b id="parV">가벼움</b></span>
+        <span class="l">평소 활동량 <b id="parV">주 1회 정도</b></span>
         <input type="range" id="par" min="0" max="7" value="2">
       </label>
-      <p class="note">정확할 필요 없어요. 대충 시작점만 잡고, 뛰면서 네 몸에 맞게 자동으로 맞춰집니다.</p>
+      <label class="field">
+        <span class="l">이미 편하게 뛰는 페이스 <span style="color:var(--low);font-weight:600;letter-spacing:0;text-transform:none">선택 · 모르면 비워둬</span></span>
+        <input type="text" id="knownPace" placeholder="예: 7:00 (1km에 몇 분)" inputmode="numeric">
+      </label>
+      <p class="note">정확할 필요 없어요. 대충 시작점만 잡고, 뛰면서 네 몸에 맞게 자동으로 맞춰집니다. 평소 편하게(대화되며) 뛰는 페이스를 알면 더 정확히 시작해요.</p>
     </div>
 
     <div class="dock">
@@ -183,7 +189,7 @@
       <div class="stat"><div class="k">거리</div><div class="v"><span id="rDist">0.00</span> <small>km</small></div></div>
       <div class="stat"><div class="k">시간</div><div class="v" id="rTime">0:00</div></div>
       <div class="stat"><div class="k">존2 유지율</div><div class="v"><span id="rPct">0</span><small>%</small></div></div>
-      <div class="stat"><div class="k">말 체크</div><div class="v"><span id="rChecks">0</span><small>회</small></div></div>
+      <div class="stat"><div class="k">칼로리</div><div class="v"><span id="rCal">0</span> <small>kcal</small></div></div>
     </div>
 
     <svg class="route" id="rRoute" viewBox="0 0 300 170" style="margin-top:14px" preserveAspectRatio="none"><polyline id="rLine" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points=""/></svg>
@@ -210,7 +216,7 @@
       <div class="stat"><div class="k">거리</div><div class="v"><span id="sDist">0.00</span> <small>km</small></div></div>
       <div class="stat"><div class="k">시간</div><div class="v" id="sTime">0:00</div></div>
       <div class="stat"><div class="k">평균 페이스</div><div class="v"><span id="sPace">–</span> <small>/km</small></div></div>
-      <div class="stat"><div class="k">말 체크</div><div class="v"><span id="sChecks">0</span> <small>회</small></div></div>
+      <div class="stat"><div class="k">칼로리</div><div class="v"><span id="sCal">0</span> <small>kcal</small></div></div>
     </div>
     <div class="card" style="margin-top:14px">
       <div class="k small muted" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:8px">달린 경로 · 존2 색상</div>
@@ -256,6 +262,9 @@
   function coldVo2max(sp){var m=sp.heightCm/100, bmi=sp.weightKg/(m*m);var s=sp.sex==='m'?1:0;
     var v=56.363 + 1.921*sp.par - 0.381*sp.age - 0.754*bmi + 10.987*s;
     return Math.max(18,Math.min(65,v));}
+  // "이미 편하게 뛰는 페이스" → 그걸 존2 중상단(0.68)으로 보고 VO2max 역산(신체스펙 추정보다 개인적)
+  function parsePace(s){s=(s||'').trim();if(!s)return null;var m;if(s.indexOf(':')>=0){var p=s.split(':');m=(+p[0])+((+p[1]||0)/60);}else{m=+s;}if(!isFinite(m)||m<3||m>25)return null;return m*60;}
+  function seedFromPace(paceS){var spd=1000/(paceS/60);var vo2=0.2*spd+VO2REST;return Math.max(15,Math.min(75,VO2REST+(vo2-VO2REST)/0.68));}
   // pace(sec/km)+grade -> %VO2R (given vo2max)
   function intensity(paceS,gPct,vo2max){var spd=1000/(paceS/60);var g=gradeEff(gPct/100);var vo2=0.2*spd+0.9*spd*g+VO2REST;return (vo2-VO2REST)/(vo2max-VO2REST);}
   // target %VO2R -> pace(sec/km) at grade
@@ -289,7 +298,8 @@
   function calcProfile(){
     var sex=$('sexSeg').querySelector('.on').dataset.sex;
     var sp={age:+$('age').value, sex:sex, heightCm:+$('height').value||165, weightKg:+$('weight').value||60, par:+$('par').value};
-    var v=coldVo2max(sp);
+    var kp=parsePace($('knownPace').value);
+    var v = kp ? seedFromPace(kp) : coldVo2max(sp);   // 아는 페이스 있으면 그걸로 시드(콜드편향 교정)
     P={age:sp.age,sex:sp.sex,heightCm:sp.heightCm,weightKg:sp.weightKg,par:sp.par,vo2max0:v,vo2max:v,createdAt:Date.now()};
     if(!prog.vo2maxHistory.length)prog.vo2maxHistory.push({t:Date.now(),vo2max:v});
     save();renderDash();show('dash');
@@ -315,8 +325,8 @@
   var run=null;
   function startRun(){
     run={pts:[],dist:0,t0:Date.now(),paused:false,secTot:0,secZone:0,pace:0,grade:0,lastFix:null,watch:null,tick:null,demo:false,
-         _lastPromptSec:0,checks:0,promptOpen:false,curR:0,firstBand:bandFor(0,P.vo2max),intenseSum:0,intenseN:0};
-    show('run');$('rPause').textContent='일시정지';$('rChecks').textContent=0;$('rPct').textContent=0;$('rDist').textContent='0.00';$('rTime').textContent='0:00';$('rLine').setAttribute('points','');
+         _lastPromptSec:0,checks:0,promptOpen:false,curR:0,firstBand:bandFor(0,P.vo2max),intenseSum:0,intenseN:0,kcal:0};
+    show('run');$('rPause').textContent='일시정지';$('rCal').textContent=0;$('rPct').textContent=0;$('rDist').textContent='0.00';$('rTime').textContent='0:00';$('rLine').setAttribute('points','');
     updateBandUI();
     if(!navigator.geolocation){return startDemo();}
     $('runState').textContent='GPS 연결 중…';
@@ -359,6 +369,9 @@
       var z=zoneOfR(run.curR);
       if(z==='zone')run.secZone++;
       run.intenseSum+=run.curR;run.intenseN++;
+      // 칼로리: 1L O2≈5kcal, VO2(ml/kg/min)×체중/1000=L/min → kcal/1s = VO2×kg×5/60/1000
+      var spd=1000/(run.pace/60), gg=gradeEff(run.grade/100), vo2now=0.2*spd+0.9*spd*gg+VO2REST;
+      run.kcal += vo2now*(P.weightKg||60)/12000;
     }
     renderRun();
     maybePrompt();
@@ -368,7 +381,7 @@
     $('rDist').textContent=(run.dist/1000).toFixed(2);
     $('rTime').textContent=fmtClock(run.secTot);
     $('rPct').textContent=run.secTot?Math.round(run.secZone/run.secTot*100):0;
-    $('rChecks').textContent=run.checks;
+    $('rCal').textContent=Math.round(run.kcal);
     if(run.pace){
       var z=zoneOfR(run.curR);
       $('rMk').style.left=markPos(run.curR)+"%";
@@ -409,7 +422,6 @@
             : d<-4 ? '여유 있네, 목표 페이스 조정 → '+fmtPace(b.fast)+'–'+fmtPace(b.slow)
             : '딱 좋아, 그대로 유지';
     toast(msg);
-    $('rChecks').textContent=run.checks;
   };
 
   function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2600);}
@@ -432,7 +444,7 @@
     $('sTime').textContent=fmtClock(run.secTot);
     var avg=run.dist>50?(run.secTot/(run.dist/1000)):0;$('sPace').textContent=avg?fmtPace(avg):'–';
     var pct=run.secTot?Math.round(run.secZone/run.secTot*100):0;
-    $('sChecks').textContent=run.checks;
+    $('sCal').textContent=Math.round(run.kcal);
     var nb=bandFor(0,P.vo2max), delta=Math.round((run.firstBand.slow - nb.slow));
     if(prog.runs<=1){
       // 첫 러닝: 유지율(초보는 낮게 나와 실패감) 대신 "찾은 존2 페이스"를 주인공으로
