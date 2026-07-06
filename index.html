@@ -94,6 +94,12 @@
   .toast.on{opacity:1}
   .spark{display:block;width:100%;height:44px}
   .pill{display:inline-block;font-size:11px;font-weight:800;color:var(--accent);background:var(--accent-dim);padding:4px 10px;border-radius:999px;letter-spacing:.04em}
+  .info-wrap{position:relative;display:inline-block}
+  .info{display:inline-flex;align-items:center;justify-content:center;width:0.66em;height:0.66em;min-width:20px;min-height:20px;border-radius:50%;background:var(--surface2);border:1px solid var(--line);color:var(--mid);font-size:12px;font-weight:800;cursor:pointer;vertical-align:middle;margin-left:6px;padding:0;line-height:1}
+  .info:active{transform:scale(.9)}
+  .tip{position:absolute;top:132%;left:0;width:min(80vw,270px);background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:13.5px;font-weight:400;line-height:1.55;color:var(--hi);letter-spacing:normal;text-transform:none;box-shadow:0 10px 28px rgba(0,0,0,.55);z-index:60;display:none}
+  .tip.on{display:block}
+  .tip b{color:var(--zone);font-weight:800}
 </style>
 
 <div class="app">
@@ -135,7 +141,7 @@
   <!-- 2. DASH -->
   <section class="screen" id="s-dash">
     <div class="eyebrow">예상 시작 페이스</div>
-    <h1 style="margin-bottom:4px">존2 목표 페이스<br><span id="dPace" style="color:var(--zone)">–</span> <span class="u" style="font-size:20px;color:var(--mid);font-weight:700">/km</span></h1>
+    <h1 style="margin-bottom:4px">존2<span class="info-wrap"><button type="button" class="info" onclick="tip(this,event)" aria-label="존2 설명">?</button><span class="tip"><b>존2 = 가장 살이 잘 빠지는 구간</b>이에요. 편하게 대화할 수 있는 낮은 강도로 오래 뛰면, 몸이 지방을 주 연료로 태워요. 그래서 '천천히'가 핵심이에요.</span></span> 목표 페이스<br><span id="dPace" style="color:var(--zone)">–</span> <span class="u" style="font-size:20px;color:var(--mid);font-weight:700">/km</span></h1>
     <p class="small" style="color:var(--zone);font-weight:700;margin-bottom:14px">느려 보여도 정상이에요 — 존2는 '대화되는 속도'예요.</p>
 
     <div class="card">
@@ -162,7 +168,7 @@
     <div class="center" style="margin-top:8px"><span class="status" id="rStat"><span class="dot"></span><span>대기</span></span></div>
 
     <div class="hero" style="margin-top:12px">
-      <div class="k">목표 존2 페이스</div>
+      <div class="k">목표 존2<span class="info-wrap"><button type="button" class="info" onclick="tip(this,event)" aria-label="존2 설명">?</button><span class="tip" style="left:50%;transform:translateX(-50%)"><b>존2 = 가장 살이 잘 빠지는 구간</b>이에요. 편하게 대화되는 낮은 강도로 오래 뛰면 지방을 주 연료로 태워요. '천천히'가 핵심.</span></span> 페이스</div>
       <div class="big" style="font-size:40px"><span id="rBand">–</span> <span class="u">/km</span></div>
       <div class="small muted" style="margin-top:6px">현재 <b id="rPace" style="color:var(--hi)">–:––</b> /km</div>
     </div>
@@ -242,6 +248,8 @@
 
   function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});$('s-'+id).classList.add('active');window.scrollTo(0,0);}
   window.show=show;
+  window.tip=function(btn,e){var t=btn.nextElementSibling,open=t.classList.contains('on');document.querySelectorAll('.tip.on').forEach(function(x){x.classList.remove('on')});if(!open)t.classList.add('on');if(e)e.stopPropagation();};
+  document.addEventListener('click',function(){document.querySelectorAll('.tip.on').forEach(function(x){x.classList.remove('on')})});
 
   // ---------- physiology ----------
   function gradeEff(g){return g<0?g*0.5:g;}
