@@ -472,8 +472,13 @@
     run.checks++;
     var slowBefore=bandFor(0,P.vo2max).slow, gamed=false;
     if(paceUsed){
+      var vo2Prev=P.vo2max;
       gamed = resp==='easy' && implausibleEasy(paceUsed,run.grade,P.vo2max); // 고강도인데 easy = 게이밍/오답
       P.vo2max = seekVo2(P.vo2max, paceUsed, run.grade, resp);
+      // 안전 불변식: 헐떡(hard)은 밴드를 절대 빠르게 안 함 / 여유(easy)는 절대 느리게 안 함
+      // (밴드보다 한참 빠르게 뛰다 hard 누르면 강도>80%라 seekVo2가 소폭 상향시키는 케이스 차단)
+      if(resp==='hard') P.vo2max=Math.min(vo2Prev,P.vo2max);
+      else if(resp==='easy') P.vo2max=Math.max(vo2Prev,P.vo2max);
       // 러닝당 상향 캡: 체력은 한 러닝 안에 안 오름 → 시작 대비 +5% 초과 상향 금지(하향은 무제한, 안전)
       P.vo2max = Math.max(15, Math.min(75, Math.min(P.vo2max, run.vo2maxAtStart*1.05)));
     }
@@ -482,6 +487,7 @@
     if(recovering){finalizeSummary();return;}    // 회수 답변이면 바로 요약으로
     var b=bandFor(0,P.vo2max), d=b.slow-slowBefore;
     var msg = gamed ? '지금은 이미 꽤 힘든 페이스예요. 존2는 편하게 대화되는 강도랍니다'
+            : resp==='hard' ? (d>4 ? '알겠어, 목표를 조금 늦출게 → '+fmtBand(b) : '지금 페이스는 존2보다 빨라요. 밴드 안으로 늦춰요')
             : d>4 ? '알겠어, 목표를 조금 늦출게 → '+fmtBand(b)
             : d<-4 ? '여유 있네, 목표 페이스 조정 → '+fmtBand(b)
             : '딱 좋아, 그대로 유지';
