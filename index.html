@@ -155,6 +155,13 @@
       <div id="dSpark" style="margin-top:12px"></div>
     </div>
 
+    <div class="card" id="rxCard" style="margin-top:14px">
+      <div class="k small muted" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700">이번 주 존2 처방</div>
+      <div style="font-size:22px;font-weight:800;margin-top:6px;letter-spacing:-.01em">주 <span id="rxFreq" style="color:var(--zone)">3</span>회 · <span id="rxDur" style="color:var(--zone)">20~30</span>분</div>
+      <div id="rxDots" style="display:flex;align-items:center;gap:7px;margin-top:12px"></div>
+      <div class="small" id="rxNext" style="color:var(--zone);font-weight:700;margin-top:12px"></div>
+    </div>
+
     <div class="grid2" style="margin-top:14px">
       <div class="stat"><div class="k">추정 체력(VO₂max)</div><div class="v" id="dVo2">- <small>ml/kg/min</small></div></div>
       <div class="stat"><div class="k">누적 러닝</div><div class="v" id="dRuns">0 <small>회</small></div></div>
@@ -316,6 +323,22 @@
   }
   window.calcProfile=calcProfile;
 
+  // 세션 처방(리텐션): 존2는 주 3회·20~30분이 초보 유산소 기본. 다음 러닝 타이밍은 48h 회복 기준.
+  var RX_FREQ=3;
+  function weeklyRuns(){var wk=Date.now()-7*864e5;return (prog.runLog||[]).filter(function(t){return t>=wk}).length;}
+  function rxDuration(){return prog.runs<6?'20~25':'25~35';}   // 첫 2주는 짧게 시작, 이후 늘림
+  function renderRx(){
+    var wd=weeklyRuns();
+    $('rxDur').textContent=rxDuration();
+    var dots='';
+    for(var i=0;i<RX_FREQ;i++){dots+='<span style="width:13px;height:13px;border-radius:50%;background:'+(i<wd?'var(--zone)':'var(--surface2)')+';border:1px solid var(--line);display:inline-block"></span>';}
+    $('rxDots').innerHTML=dots+'<span class="small muted" style="margin-left:8px;font-weight:700">이번 주 '+Math.min(wd,RX_FREQ)+'/'+RX_FREQ+'회</span>';
+    var log=prog.runLog||[], last=log.length?log[log.length-1]:0, hrs=last?(Date.now()-last)/36e5:9999;
+    $('rxNext').textContent = prog.runs===0 ? '오늘 첫 존2 러닝을 시작해요.'
+      : hrs<20 ? '오늘은 회복하고, 내일 존2 러닝을 추천해요.'
+      : wd>=RX_FREQ ? '이번 주 목표 달성! 더 뛰면 보너스예요.'
+      : '오늘 존2 러닝 하기 좋은 날이에요.';
+  }
   function renderDash(){
     var b=bandFor(0,P.vo2max);
     $('dPace').textContent=fmtBand(b);
@@ -323,6 +346,7 @@
                                         : "느려 보여도 정상이에요. 존2는 '대화되는 속도'예요.";
     $('dVo2').innerHTML=Math.round(P.vo2max)+' <small>ml/kg/min</small>';
     $('dRuns').innerHTML=prog.runs+' <small>회</small>';
+    renderRx();
     drawSpark($('dSpark'));
   }
   function drawSpark(host){
@@ -542,7 +566,9 @@
       $('sRoute').innerHTML='<div class="small muted" style="padding:56px 12px;text-align:center">실내 미리보기라 경로 기록이 없어요</div>';
       show('sum');return;
     }
-    prog.runs++;prog.vo2maxHistory.push({t:Date.now(),vo2max:P.vo2max});if(prog.vo2maxHistory.length>60)prog.vo2maxHistory.shift();save();
+    prog.runs++;prog.runLog=prog.runLog||[];prog.runLog.push(Date.now());if(prog.runLog.length>200)prog.runLog.shift();
+    prog.vo2maxHistory.push({t:Date.now(),vo2max:P.vo2max});if(prog.vo2maxHistory.length>60)prog.vo2maxHistory.shift();save();
+    var _wd=weeklyRuns(), _rest=_wd>=RX_FREQ?'이번 주 목표 '+RX_FREQ+'회 달성!':'이번 주 '+_wd+'/'+RX_FREQ+'회 · 다음은 하루 이틀 뒤에.';
     $('sDist').textContent=(run.dist/1000).toFixed(2);
     $('sTime').textContent=fmtClock(run.secTot);
     var avg=run.dist>50?(run.secTot/(run.dist/1000)):0;$('sPace').textContent=avg?fmtPace(avg):'-';
@@ -562,6 +588,7 @@
         : delta<-3 ? '네 존2를 조금 더 천천히로 맞췄어요. 느린 게 진짜 실력을 키워요.'
         : '네 존2 페이스가 안정적으로 자리잡고 있어요.';
     }
+    $('sBandMsg').textContent += ' '+_rest;   // 다음 러닝 넛지(리텐션)
     var line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('fill','none');line.setAttribute('stroke','var(--zone)');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linejoin','round');
     $('sRoute').innerHTML='';$('sRoute').appendChild(line);drawRoute(line,run.pts,run.demo);
     show('sum');
