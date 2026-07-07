@@ -151,20 +151,23 @@
     <p class="small" id="dSub" style="color:var(--zone);font-weight:700;margin-bottom:14px">느려 보여도 정상이에요. 존2는 '대화되는 속도'예요.</p>
 
     <div class="card">
-      <div class="small muted"><b style="color:var(--hi)">존2는 원래 느립니다.</b> 초보는 거의 빠르게 걷듯이 뛰어요. 이건 <b style="color:var(--hi)">추정 시작점</b>이라, 첫 러닝에서 "말 되냐?" 몇 번 물어 <b style="color:var(--hi)">네 진짜 존2 페이스</b>를 찾아요. 뛸수록 정확해져요.</div>
+      <div class="small muted"><b style="color:var(--hi)">존2는 원래 느립니다.</b> 엘리트 러너도 훈련의 80%를 이 강도로 뜁니다. 초보는 거의 빠르게 걷듯이 뛰어요. 이건 <b style="color:var(--hi)">추정 시작점</b>이라, 첫 러닝에서 "말 되냐?" 몇 번 물어 <b style="color:var(--hi)">네 진짜 존2 페이스</b>를 찾아요. 뛸수록 정확해져요.</div>
       <div id="dSpark" style="margin-top:12px"></div>
     </div>
 
     <div class="card" id="rxCard" style="margin-top:14px">
       <div class="k small muted" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700">이번 주 존2 처방</div>
       <div style="font-size:22px;font-weight:800;margin-top:6px;letter-spacing:-.01em">주 <span id="rxFreq" style="color:var(--zone)">3</span>회 · <span id="rxDur" style="color:var(--zone)">20~30</span>분</div>
-      <div id="rxDots" style="display:flex;align-items:center;gap:7px;margin-top:12px"></div>
-      <div class="small" id="rxNext" style="color:var(--zone);font-weight:700;margin-top:12px"></div>
+      <div id="rxDots" style="display:flex;align-items:flex-start;gap:4px;margin-top:14px"></div>
+      <div class="small muted" id="rxStreak" style="font-weight:700;margin-top:12px"></div>
+      <div class="small" id="rxNext" style="color:var(--zone);font-weight:700;margin-top:8px"></div>
     </div>
 
     <div class="grid2" style="margin-top:14px">
       <div class="stat"><div class="k">추정 체력(VO₂max)</div><div class="v" id="dVo2">- <small>ml/kg/min</small></div></div>
       <div class="stat"><div class="k">누적 러닝</div><div class="v" id="dRuns">0 <small>회</small></div></div>
+      <div class="stat"><div class="k">누적 존2 시간</div><div class="v" id="dZ2Tot">0 <small>분</small></div></div>
+      <div class="stat"><div class="k">이번 주 존2</div><div class="v" id="dZ2Wk">0 <small>분</small></div></div>
     </div>
 
     <p class="note">심박 숫자는 안 보여줍니다. 대신 뛰면서 지킬 수 있는 <b>페이스</b>와 "말 되냐?" 체크로 존2를 안내해요. 달릴 땐 폰을 손에 들거나 팔에 차면 "말 체크"를 놓치지 않아요. 의료·진단 목적이 아닙니다.</p>
@@ -231,7 +234,8 @@
       <svg class="route" id="sRoute" viewBox="0 0 300 170" preserveAspectRatio="none"></svg>
     </div>
     <div class="dock">
-      <button class="btn" onclick="show('dash');renderDash()">완료</button>
+      <button class="btn" id="sShare" onclick="shareCard()">기록 카드 공유</button>
+      <button class="btn ghost sm" onclick="show('dash');renderDash()">완료</button>
     </div>
   </section>
 
@@ -324,16 +328,37 @@
   window.calcProfile=calcProfile;
 
   // 세션 처방(리텐션): 존2는 주 3회·20~30분이 초보 유산소 기본. 다음 러닝 타이밍은 48h 회복 기준.
-  var RX_FREQ=3;
-  function weeklyRuns(){var wk=Date.now()-7*864e5;return (prog.runLog||[]).filter(function(t){return t>=wk}).length;}
+  var RX_FREQ=3, DAY=864e5;
+  // runLog 엔트리: 구버전=timestamp 숫자, 신버전={t,durS,z2S} (하위호환 유지)
+  function tOfLog(e){return typeof e==='number'?e:e.t;}
+  function weekStartTs(){var n=new Date(),mid=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime();return mid-((n.getDay()+6)%7)*DAY;}  // 이번 주 월요일 00:00
+  // 주간 집계는 전부 달력 주(월요일 시작) 기준 — 요일 그리드·스트릭·"이번 주 N/3회" 라벨이 한 기준을 봐야 함(롤링 7일이면 라벨=3회인데 그리드=2칸 모순)
+  function weeklyRuns(){var ws=weekStartTs();return (prog.runLog||[]).filter(function(e){return tOfLog(e)>=ws}).length;}
+  function weeklyZ2Min(){var ws=weekStartTs(),s=0;(prog.runLog||[]).forEach(function(e){if(typeof e!=='number'&&e.t>=ws)s+=(e.z2S||0);});return Math.round(s/60);}
+  function weekStreak(){   // 주 RX_FREQ회 목표를 연속 달성한 주 수. 이번 주는 이미 달성했을 때만 포함(진행 중엔 체인 안 끊김).
+    var log=(prog.runLog||[]).map(tOfLog);if(!log.length)return 0;
+    var ws=weekStartTs(),streak=0;
+    function cnt(s){return log.filter(function(t){return t>=s&&t<s+7*DAY}).length;}
+    if(cnt(ws)>=RX_FREQ)streak++;
+    ws-=7*DAY;
+    while(cnt(ws)>=RX_FREQ){streak++;ws-=7*DAY;}
+    return streak;
+  }
   function rxDuration(){return prog.runs<6?'20~25':'25~35';}   // 첫 2주는 짧게 시작, 이후 늘림
   function renderRx(){
     var wd=weeklyRuns();
     $('rxDur').textContent=rxDuration();
-    var dots='';
-    for(var i=0;i<RX_FREQ;i++){dots+='<span style="width:13px;height:13px;border-radius:50%;background:'+(i<wd?'var(--zone)':'var(--surface2)')+';border:1px solid var(--line);display:inline-block"></span>';}
-    $('rxDots').innerHTML=dots+'<span class="small muted" style="margin-left:8px;font-weight:700">이번 주 '+Math.min(wd,RX_FREQ)+'/'+RX_FREQ+'회</span>';
-    var log=prog.runLog||[], last=log.length?log[log.length-1]:0, hrs=last?(Date.now()-last)/36e5:9999;
+    // 이번 주 요일 그리드: 러닝한 날 채움, 오늘 강조 (습관 시각화)
+    var ws=weekStartTs(),today=Math.floor((Date.now()-ws)/DAY),ran={};
+    (prog.runLog||[]).forEach(function(e){var t=tOfLog(e);if(t>=ws)ran[Math.floor((t-ws)/DAY)]=1;});
+    var lbl=['월','화','수','목','금','토','일'],cells='';
+    for(var i=0;i<7;i++){
+      cells+='<div style="flex:1;text-align:center"><div style="width:22px;height:22px;border-radius:50%;background:'+(ran[i]?'var(--zone)':'var(--surface2)')+';border:'+(i===today?'2px solid var(--accent)':'1px solid var(--line)')+';margin:0 auto"></div><div style="font-size:10px;font-weight:700;color:'+(i===today?'var(--hi)':'var(--low)')+';margin-top:5px">'+lbl[i]+'</div></div>';
+    }
+    $('rxDots').innerHTML=cells;
+    var st=weekStreak();
+    $('rxStreak').innerHTML='이번 주 <b style="color:var(--zone)">'+wd+'/'+RX_FREQ+'회</b>'+(st>0?' · <b style="color:var(--zone)">'+st+'주 연속 목표 달성</b>':'');  // 캡 없이 실횟수(4/3회 가능) — 그리드와 모순 금지. 그리드=달린 날, 라벨=세션 수(하루 2런은 2회가 맞음)
+    var log=prog.runLog||[], last=log.length?tOfLog(log[log.length-1]):0, hrs=last?(Date.now()-last)/36e5:9999;
     $('rxNext').textContent = prog.runs===0 ? '오늘 첫 존2 러닝을 시작해요.'
       : hrs<20 ? '오늘은 회복하고, 내일 존2 러닝을 추천해요.'
       : wd>=RX_FREQ ? '이번 주 목표 달성! 더 뛰면 보너스예요.'
@@ -346,6 +371,8 @@
                                         : "느려 보여도 정상이에요. 존2는 '대화되는 속도'예요.";
     $('dVo2').innerHTML=Math.round(P.vo2max)+' <small>ml/kg/min</small>';
     $('dRuns').innerHTML=prog.runs+' <small>회</small>';
+    $('dZ2Tot').innerHTML=Math.round((prog.z2sec||0)/60)+' <small>분</small>';
+    $('dZ2Wk').innerHTML=weeklyZ2Min()+' <small>분</small>';
     renderRx();
     drawSpark($('dSpark'));
   }
@@ -395,6 +422,7 @@
   function startDemo(){
     if(run.demo)return;run.demo=true;$('runState').textContent='미리보기 · 실내(GPS 없음)라 기록은 저장되지 않아요';
     if(run.watch){navigator.geolocation.clearWatch(run.watch);run.watch=null;}
+    run.pts=[];run.dist=0;run.lastFix=null;$('rLine').setAttribute('points','');   // GPS 픽스가 몇 개 들어온 뒤 전환됐어도 좌표 형식 혼입(lat/lng vs x/y) 방지
     if(!run.tick)run.tick=setInterval(loopRun,1000);
     // 초반 빠르게 출발 → 프롬프트/교정 시연되게. 존2 근처를 오가되 살짝 빠른 쪽.
     var mid=(run.firstBand.fast+run.firstBand.slow)/2, ang=0;
@@ -442,6 +470,7 @@
 
   function maybePrompt(){
     if(run.promptOpen)return;
+    if(!run.pace)return;                               // 정지 상태(페이스 미포착)엔 말 체크 안 띄움
     var gap = run.secTot - (run._lastPromptSec||0);   // 마지막 프롬프트 이후 경과(초)
     if(gap<120)return;                                 // 최소 2분 간격
     if(run.curR>0.73 || gap>=300){ askTalk(false); }   // 존2 위로 드리프트(73%↑) 또는 5분 경과
@@ -454,7 +483,7 @@
     $('promptP').innerHTML='한 문장 편하게 말할 수 있나요?<br>이게 존2인지 알려주는 진짜 기준이에요.';
   }
   window.askTalk=function(manual){
-    if(!run||run.promptOpen)return;
+    if(!run||run.promptOpen||run._stopping)return;
     resetPromptText();
     run.promptOpen=true;run._lastPromptSec=run.secTot;run.recovering=false;
     if(!manual)run.promptsFired++;
@@ -511,6 +540,7 @@
     run.promptLog=run.promptLog||[];run.promptLog.push({t:run.secTot,paceS:paceUsed,resp:resp});
     save();updateBandUI();
     if(recovering){finalizeSummary();return;}    // 회수 답변이면 바로 요약으로
+    if(!paceUsed){toast('아직 페이스가 안 잡혀서 이번 답은 교정에 쓰지 않았어요.');return;}  // 정지 중 수동 체크
     var b=bandFor(0,P.vo2max), d=b.slow-slowBefore;
     var msg = gamed ? '지금은 이미 꽤 힘든 페이스예요. 존2는 편하게 대화되는 강도랍니다'
             : resp==='hard' ? (d>4 ? '알겠어, 목표를 조금 늦출게 → '+fmtBand(b) : '지금 페이스는 존2보다 빨라요. 밴드 안으로 늦춰요')
@@ -534,11 +564,12 @@
     el.setAttribute('points',s);
   }
   window.pauseRun=function(){
+    if(!run||run._stopping)return;   // 종료된 stale run 객체에 대한 조작 차단(요약/대시로 나간 뒤 호출 등)
     if(run.promptOpen&&!run.recovering){run.missed++;if(run._promptPace)run._lastMissedPace=run._promptPace;$('overlay').classList.remove('on');run.promptOpen=false;clearTimeout(run._ptimer);}  // 프롬프트+일시정지 공존 방지 + 놓침 기록(회수 트리거 유지)
     run.paused=!run.paused;$('rPause').textContent=run.paused?'재개':'일시정지';$('runState').textContent=run.paused?'일시정지됨':(run.demo?'미리보기 · 실내(GPS 없음)':'추적 중');};
 
   window.stopRun=function(){
-    if(run._stopping)return; run._stopping=true;                  // 재진입 차단(더블탭·회수 중 재종료 → 이중 적재 방지)
+    if(!run||run._stopping)return; run._stopping=true;                  // 재진입 차단(더블탭·회수 중 재종료 → 이중 적재 방지)
     if(run.promptOpen && !run.recovering){                        // 프롬프트 열린 채 종료 → 그 시도를 놓침으로 회수 대상에 포함
       run.missed++; if(run._promptPace)run._lastMissedPace=run._promptPace;
       $('overlay').classList.remove('on'); run.promptOpen=false;
@@ -563,10 +594,14 @@
       $('sBandMsg').textContent='실내·GPS 없이는 거리·경로·칼로리가 기록되지 않아요. 야외에서 GPS로 뛰면 자동 저장되고 네 존2도 정확히 맞춰져요.';
       $('sDist').textContent='-';$('sPace').textContent='-';$('sCal').textContent='-';
       $('sTime').textContent=fmtClock(run.secTot);
-      $('sRoute').innerHTML='<div class="small muted" style="padding:56px 12px;text-align:center">실내 미리보기라 경로 기록이 없어요</div>';
+      $('sRoute').innerHTML='<text x="150" y="90" fill="#8A93A3" font-size="12" font-weight="700" text-anchor="middle">실내 미리보기라 경로 기록이 없어요</text>';  // svg 안엔 div가 렌더 안 됨(네임스페이스) → svg text
+      $('sShare').style.display='none';          // 가짜 데이터 공유 방지
       show('sum');return;
     }
-    prog.runs++;prog.runLog=prog.runLog||[];prog.runLog.push(Date.now());if(prog.runLog.length>200)prog.runLog.shift();
+    // 공유는 카드가 자랑거리일 때만: 5분+300m 미만은 "운동 안 함" 수준 카드라 획득 루프에 역효과
+    $('sShare').style.display=(run.secTot>=300&&run.dist>=300)?'':'none';
+    prog.runs++;prog.runLog=prog.runLog||[];prog.runLog.push({t:Date.now(),durS:run.secTot,z2S:run.secZone});if(prog.runLog.length>200)prog.runLog.shift();
+    prog.z2sec=(prog.z2sec||0)+run.secZone;
     prog.vo2maxHistory.push({t:Date.now(),vo2max:P.vo2max});if(prog.vo2maxHistory.length>60)prog.vo2maxHistory.shift();save();
     var _wd=weeklyRuns(), _rest=_wd>=RX_FREQ?'이번 주 목표 '+RX_FREQ+'회 달성!':'이번 주 '+_wd+'/'+RX_FREQ+'회 · 다음은 하루 이틀 뒤에.';
     $('sDist').textContent=(run.dist/1000).toFixed(2);
@@ -589,10 +624,60 @@
         : '네 존2 페이스가 안정적으로 자리잡고 있어요.';
     }
     $('sBandMsg').textContent += ' '+_rest;   // 다음 러닝 넛지(리텐션)
-    var line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('fill','none');line.setAttribute('stroke','var(--zone)');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linejoin','round');
-    $('sRoute').innerHTML='';$('sRoute').appendChild(line);drawRoute(line,run.pts,run.demo);
+    if(run.pts.length<2){
+      $('sRoute').innerHTML='<text x="150" y="90" fill="#8A93A3" font-size="12" font-weight="700" text-anchor="middle">이동 거리가 짧아 경로가 없어요</text>';
+    } else {
+      var line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('fill','none');line.setAttribute('stroke','var(--zone)');line.setAttribute('stroke-width','3');line.setAttribute('stroke-linejoin','round');
+      $('sRoute').innerHTML='';$('sRoute').appendChild(line);drawRoute(line,run.pts,run.demo);
+    }
     show('sum');
   }
+
+  // ---------- 공유카드 (획득 루프): 요약을 1080x1350 이미지로 렌더 → 시스템 공유(폴백: 다운로드) ----------
+  window.shareCard=function(){
+    if(!run||run.demo)return;
+    var W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;var x=c.getContext('2d');
+    var F='system-ui,-apple-system,sans-serif';
+    x.fillStyle='#0E1116';x.fillRect(0,0,W,H);
+    x.fillStyle='#6C7BFF';x.font='800 36px '+F;x.fillText('존2 러닝 · 맥박계 없이',80,128);
+    var dt=new Date(),ds=dt.getFullYear()+'.'+('0'+(dt.getMonth()+1)).slice(-2)+'.'+('0'+dt.getDate()).slice(-2);
+    x.fillStyle='#5A626F';x.font='700 30px '+F;x.textAlign='right';x.fillText(ds,W-80,128);x.textAlign='left';
+    var first=prog.runs<=1, nb=bandFor(0,P.vo2max);
+    var pct=run.secTot?Math.round(run.secZone/run.secTot*100):0;
+    x.fillStyle='#8A93A3';x.font='700 32px '+F;x.fillText(first?'찾은 나의 존2 페이스(추정)':'존2 유지율(추정)',80,240);   // 카드는 앱 밖으로 유통 → 두 변형 모두 추정 라벨 필수(오도방지 불변식)
+    x.fillStyle='#34C77B';x.font='800 118px '+F;
+    var hero=first?fmtBand(nb):String(pct);x.fillText(hero,80,360);
+    var hw=x.measureText(hero).width;
+    x.fillStyle='#8A93A3';x.font='700 44px '+F;x.fillText(first?' /km':' %',80+hw+8,360);
+    x.strokeStyle='#2A303B';x.lineWidth=2;x.beginPath();x.moveTo(80,430);x.lineTo(W-80,430);x.stroke();
+    var avg=run.dist>50?(run.secTot/(run.dist/1000)):0;
+    var stats=[['거리',(run.dist/1000).toFixed(2)+' km'],['시간',fmtClock(run.secTot)],['평균 페이스',(avg?fmtPace(avg):'-')+' /km'],['칼로리',Math.round(run.kcal)+' kcal']];
+    stats.forEach(function(s,i){
+      var sx=80+(i%2)*470, sy=520+Math.floor(i/2)*170;
+      x.fillStyle='#8A93A3';x.font='700 28px '+F;x.fillText(s[0],sx,sy);
+      x.fillStyle='#F2F4F8';x.font='800 58px '+F;x.fillText(s[1],sx,sy+66);
+    });
+    if(run.pts.length>=2){                       // 경로 미니맵
+      var la=run.pts.map(function(p){return p.lat}),lo=run.pts.map(function(p){return p.lng});
+      var laMin=Math.min.apply(0,la),laMax=Math.max.apply(0,la),loMin=Math.min.apply(0,lo),loMax=Math.max.apply(0,lo);
+      var sLa=(laMax-laMin)||1e-6,sLo=(loMax-loMin)||1e-6,bx=80,by=860,bw=W-160,bh=320;   // 스탯~푸터 사이 수직 균형
+      x.strokeStyle='#34C77B';x.lineWidth=6;x.lineJoin='round';x.lineCap='round';x.beginPath();
+      run.pts.forEach(function(p,i){var px=bx+(p.lng-loMin)/sLo*bw, py=by+bh-(p.lat-laMin)/sLa*bh;i?x.lineTo(px,py):x.moveTo(px,py);});
+      x.stroke();
+    }
+    x.fillStyle='#5A626F';x.font='700 28px '+F;x.fillText('심박계 없이 내 존2를 찾는 슬로우런닝',80,H-84);
+    c.toBlob(function(b){
+      if(!b)return toast('카드 생성에 실패했어요. 다시 시도해 주세요.');
+      var f=new File([b],'zone2-run.png',{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[f]})&&navigator.share){
+        navigator.share({files:[f],title:'존2 러닝'}).catch(function(){});
+      } else {
+        var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='zone2-run.png';document.body.appendChild(a);a.click();a.remove();
+        setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+        toast('기록 카드를 저장했어요. 사진에서 공유해 보세요.');
+      }
+    },'image/png');
+  };
 
   // init
   load();
