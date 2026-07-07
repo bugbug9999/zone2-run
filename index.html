@@ -163,6 +163,31 @@
       <div class="small" id="rxNext" style="color:var(--zone);font-weight:700;margin-top:8px"></div>
     </div>
 
+    <div class="card" id="streakCard" style="margin-top:14px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <svg id="stFlame" width="34" height="40" viewBox="0 0 24 28" aria-hidden="true">
+          <path id="stFlameP" fill="var(--low)" d="M12 1c1.6 5.2 7 8 7 14a7 7 0 0 1-14 0c0-4.4 3.4-6.6 4.6-10.4.9 1.7 1.8 2.8 2.9 3.6C12.9 5.7 12 3.4 12 1z"/>
+          <path id="stFlameQ" fill="var(--ground)" d="M12 13c.9 2.2 3 3.3 3 5.6a3 3 0 0 1-6 0c0-1.8 1.4-2.7 2-4 .4.7.7 1.1 1 1.4 0-1-.3-2-.0-3z"/>
+        </svg>
+        <div>
+          <div style="font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.1"><span id="stNum">0</span> <span class="small muted" style="font-weight:800">러닝 스트릭</span></div>
+          <div class="small" id="stMsg" style="color:var(--mid);font-weight:700;margin-top:3px"></div>
+        </div>
+      </div>
+      <div class="k small muted" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-top:18px">지난 30일</div>
+      <div id="grassHead" style="display:flex;gap:4px;margin-top:10px"></div>
+      <div id="grass" style="margin-top:4px"></div>
+      <div style="display:flex;align-items:center;gap:4px;margin-top:10px;font-size:11px;color:var(--low);font-weight:700">
+        <span style="margin-right:2px">색 = 그날 존2 분 · 적게</span>
+        <span style="width:11px;height:11px;border-radius:3px;background:var(--surface2);display:inline-block"></span>
+        <span style="width:11px;height:11px;border-radius:3px;background:rgba(52,199,123,.28);display:inline-block"></span>
+        <span style="width:11px;height:11px;border-radius:3px;background:rgba(52,199,123,.55);display:inline-block"></span>
+        <span style="width:11px;height:11px;border-radius:3px;background:rgba(52,199,123,.8);display:inline-block"></span>
+        <span style="width:11px;height:11px;border-radius:3px;background:var(--zone);display:inline-block"></span>
+        <span style="margin-left:2px">많이</span>
+      </div>
+    </div>
+
     <div class="grid2" style="margin-top:14px">
       <div class="stat"><div class="k">추정 체력(VO₂max)</div><div class="v" id="dVo2">- <small>ml/kg/min</small></div></div>
       <div class="stat"><div class="k">누적 러닝</div><div class="v" id="dRuns">0 <small>회</small></div></div>
@@ -344,6 +369,55 @@
     while(cnt(ws)>=RX_FREQ){streak++;ws-=7*DAY;}
     return streak;
   }
+  // ---------- 러닝 스트릭(듀오링고식) + 30일 잔디 ----------
+  // 스트릭 단위 = "3일 안에 다시 뛰면 이어지는 러닝 체인"(달린 날 수). 주3회 48h 회복 처방과 정합 — 매일 연속은 과훈련 유도라 배제.
+  function dayKey(t){var d=new Date(t);return Math.round(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/DAY);}  // 로컬 자정 기준 일 인덱스
+  function runStreak(){
+    var set={};(prog.runLog||[]).forEach(function(e){set[dayKey(tOfLog(e))]=1;});
+    var days=Object.keys(set).map(Number).sort(function(a,b){return a-b});
+    if(!days.length)return {n:0,since:-1};
+    var since=dayKey(Date.now())-days[days.length-1];
+    if(since>3)return {n:0,since:since};              // 마지막 러닝 후 4일째 자정 = 끊김
+    var n=1;
+    for(var i=days.length-1;i>0;i--){if(days[i]-days[i-1]<=3)n++;else break;}
+    return {n:n,since:since};
+  }
+  function grassLevel(m){return m<=0?0:m<10?1:m<20?2:m<30?3:4;}  // 그날 존2 분 → 농도 4단계
+  var GRASS_BG=['var(--surface2)','rgba(52,199,123,.28)','rgba(52,199,123,.55)','rgba(52,199,123,.8)','var(--zone)'];
+  function renderStreak(){
+    var st=runStreak();
+    $('stNum').textContent=st.n;
+    var alive=st.n>0, risk=alive&&st.since>=2;
+    $('stFlameP').setAttribute('fill', alive?(risk?'var(--fast)':'var(--slow)'):'var(--low)');
+    $('stMsg').style.color = risk?'var(--fast)':'var(--mid)';
+    $('stMsg').textContent =
+      !alive&&st.since<0 ? '첫 러닝으로 스트릭을 시작해요.'
+      : !alive ? '스트릭이 끊겼어요. 오늘 다시 시작하면 1부터 쌓여요.'
+      : st.since===0 ? '오늘 뛰었어요! 3일 안에 다시 뛰면 이어져요.'
+      : st.since===1 ? '잘 가고 있어요. 이틀 안에 뛰면 이어져요.'
+      : st.since===2 ? '내일까지 뛰면 스트릭이 이어져요.'
+      : '오늘 뛰어야 스트릭이 지켜져요!';
+  }
+  function renderGrass(){
+    var gridStart=weekStartTs()-28*DAY, todayIdx=Math.floor((Date.now()-gridStart)/DAY);
+    var mins=[];for(var i=0;i<35;i++)mins[i]=0;
+    (prog.runLog||[]).forEach(function(e){var t=tOfLog(e),idx=Math.floor((t-gridStart)/DAY);
+      if(idx>=0&&idx<35)mins[idx]+= (typeof e==='number')?0.5:(e.z2S||0)/60;});   // 구버전(숫자)은 최소 농도 1단계
+    var lbl=['월','화','수','목','금','토','일'],head='';
+    for(var c=0;c<7;c++)head+='<div style="flex:1;text-align:center;font-size:10px;font-weight:700;color:var(--low)">'+lbl[c]+'</div>';
+    $('grassHead').innerHTML=head;
+    var html='';
+    for(var w=0;w<5;w++){
+      html+='<div style="display:flex;gap:4px;margin-top:4px">';
+      for(var c2=0;c2<7;c2++){
+        var idx2=w*7+c2, future=idx2>todayIdx, today=idx2===todayIdx;
+        html+='<div style="flex:1;aspect-ratio:1;border-radius:5px;background:'+(future?'transparent':GRASS_BG[grassLevel(mins[idx2])])+
+          ';border:'+(today?'2px solid var(--accent)':(future?'none':'1px solid var(--line)'))+'"></div>';
+      }
+      html+='</div>';
+    }
+    $('grass').innerHTML=html;
+  }
   function rxDuration(){return prog.runs<6?'20~25':'25~35';}   // 첫 2주는 짧게 시작, 이후 늘림
   function renderRx(){
     var wd=weeklyRuns();
@@ -373,7 +447,7 @@
     $('dRuns').innerHTML=prog.runs+' <small>회</small>';
     $('dZ2Tot').innerHTML=Math.round((prog.z2sec||0)/60)+' <small>분</small>';
     $('dZ2Wk').innerHTML=weeklyZ2Min()+' <small>분</small>';
-    renderRx();
+    renderRx();renderStreak();renderGrass();
     drawSpark($('dSpark'));
   }
   function drawSpark(host){
@@ -604,6 +678,7 @@
     prog.z2sec=(prog.z2sec||0)+run.secZone;
     prog.vo2maxHistory.push({t:Date.now(),vo2max:P.vo2max});if(prog.vo2maxHistory.length>60)prog.vo2maxHistory.shift();save();
     var _wd=weeklyRuns(), _rest=_wd>=RX_FREQ?'이번 주 목표 '+RX_FREQ+'회 달성!':'이번 주 '+_wd+'/'+RX_FREQ+'회 · 다음은 하루 이틀 뒤에.';
+    var _st=runStreak(); if(_st.n>=2)_rest+=' 러닝 스트릭 '+_st.n+' 이어가는 중!';   // 스트릭 넛지(1은 노이즈라 2부터, "이어가는 중"=체인 프레이밍으로 N일연속 오독 방지)
     $('sDist').textContent=(run.dist/1000).toFixed(2);
     $('sTime').textContent=fmtClock(run.secTot);
     var avg=run.dist>50?(run.secTot/(run.dist/1000)):0;$('sPace').textContent=avg?fmtPace(avg):'-';
