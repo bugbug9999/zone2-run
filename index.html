@@ -188,6 +188,24 @@
       </div>
     </div>
 
+    <div class="card" id="wtCard" style="margin-top:14px">
+      <div class="k small muted" style="letter-spacing:.1em;text-transform:uppercase;font-weight:700">몸무게</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px">
+        <div style="font-size:30px;font-weight:800;letter-spacing:-.02em"><span id="wtNow">-</span> <span class="small muted" style="font-weight:700">kg</span></div>
+        <div class="small" id="wtDelta" style="font-weight:800"></div>
+      </div>
+      <div id="wtSpark" style="margin-top:10px"></div>
+      <div class="small" id="wtBurn" style="color:var(--zone);font-weight:700;margin-top:10px"></div>
+      <div id="wtForm" style="display:none;margin-top:12px">
+        <div style="display:flex;gap:8px">
+          <input type="number" id="wtIn" step="0.1" min="30" max="200" inputmode="decimal" placeholder="오늘 몸무게 (kg)" style="margin-top:0;font-size:17px;font-weight:700">
+          <button class="btn sm" style="width:auto;padding:12px 18px" onclick="saveWeight()">저장</button>
+        </div>
+      </div>
+      <button class="btn ghost sm" id="wtBtn" style="margin-top:12px" onclick="toggleWeightForm()">오늘 몸무게 기록</button>
+      <p class="note" style="margin-top:12px">정직하게 말하면, 주 3회 존2 러닝은 한 달 지방 0.3~0.5kg 수준이에요. 감량의 절반 이상은 식사에서 와요. 러닝의 역할은 태우면서 근육과 습관을 지키는 것. 꾸준함이 답이에요.</p>
+    </div>
+
     <div class="grid2" style="margin-top:14px">
       <div class="stat"><div class="k">추정 체력(VO₂max)</div><div class="v" id="dVo2">- <small>ml/kg/min</small></div></div>
       <div class="stat"><div class="k">누적 러닝</div><div class="v" id="dRuns">0 <small>회</small></div></div>
@@ -348,6 +366,7 @@
     var v = kp ? seedFromPace(kp) : coldVo2max(sp);   // 아는 페이스 있으면 그걸로 시드(콜드편향 교정)
     P={age:sp.age,sex:sp.sex,heightCm:sp.heightCm,weightKg:sp.weightKg,par:sp.par,vo2max0:v,vo2max:v,createdAt:Date.now()};
     if(!prog.vo2maxHistory.length)prog.vo2maxHistory.push({t:Date.now(),vo2max:v});
+    if(!(prog.weightLog||[]).length)logWeight(sp.weightKg);   // 최초 온보딩만 시드 — 재온보딩이 당일 수동 기록을 덮지 않게
     save();renderDash();show('dash');
   }
   window.calcProfile=calcProfile;
@@ -383,6 +402,45 @@
     return {n:n,since:since};
   }
   function grassLevel(m){return m<=0?0:m<10?1:m<20?2:m<30?3:4;}  // 그날 존2 분 → 농도 4단계
+
+  // ---------- 몸무게 로그 + 감량 환산 (다이어트 세그먼트 북극성) ----------
+  function logWeight(kg){                                   // 하루 1건, 같은 날은 덮어쓰기
+    if(!isFinite(kg)||kg<30||kg>200)return false;
+    prog.weightLog=prog.weightLog||[];
+    var k=dayKey(Date.now()),last=prog.weightLog[prog.weightLog.length-1];
+    if(last&&dayKey(last.t)===k){last.kg=kg;last.t=Date.now();}
+    else prog.weightLog.push({t:Date.now(),kg:kg});
+    while(prog.weightLog.length>400)prog.weightLog.shift();
+    save();return true;
+  }
+  function weeklyKcal(){var ws=weekStartTs(),s=0;(prog.runLog||[]).forEach(function(e){if(typeof e!=='number'&&e.t>=ws)s+=(e.kcal||0);});return Math.round(s);}
+  function fatG(kcal){return Math.round(kcal/7.7);}          // 지방 1kg ≈ 7700kcal
+  function renderWeight(){
+    var log=prog.weightLog||[];
+    if(!log.length){$('wtNow').textContent='-';$('wtDelta').textContent='';$('wtSpark').innerHTML='<div class="small muted">몸무게를 기록하면 추이가 그려져요.</div>';}
+    else{
+      var cur=log[log.length-1].kg, first=log[0].kg, d=Math.round((cur-first)*10)/10;
+      $('wtNow').textContent=cur;
+      $('wtDelta').textContent = log.length<2?'': d<0?('시작 대비 '+d+' kg'):d>0?('시작 대비 +'+d+' kg'):'시작 대비 그대로';
+      $('wtDelta').style.color = d<0?'var(--zone)':'var(--mid)';
+      if(log.length<2){$('wtSpark').innerHTML='<div class="small muted">이틀째부터 추이가 그려져요.</div>';}
+      else{
+        var vs=log.map(function(x){return x.kg}),mn=Math.min.apply(0,vs)-0.5,mx=Math.max.apply(0,vs)+0.5,rng=(mx-mn)||1;
+        var pts=log.map(function(x,i){return (i/(log.length-1)*300).toFixed(1)+','+(40-((x.kg-mn)/rng)*36+2).toFixed(1);}).join(' ');
+        $('wtSpark').innerHTML='<svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/></svg>';
+      }
+    }
+    var wk=weeklyKcal(), tot=Math.round(prog.kcalTotal||0);
+    $('wtBurn').textContent = wk>0 ? '이번 주 러닝 소모 '+wk+' kcal, 지방 약 '+fatG(wk)+'g 상당'+(tot>wk?' (누적 '+fatG(tot)+'g)':'')
+                                   : '이번 주 존2 러닝으로 지방 태우기를 시작해요.';
+  }
+  window.toggleWeightForm=function(){var f=$('wtForm'),on=f.style.display!=='none';f.style.display=on?'none':'';$('wtBtn').textContent=on?'오늘 몸무게 기록':'닫기';if(!on)$('wtIn').focus();};
+  window.saveWeight=function(){
+    var v=parseFloat($('wtIn').value);
+    if(!logWeight(v)){toast('30~200 사이 숫자로 입력해 주세요.');return;}
+    $('wtIn').value='';$('wtForm').style.display='none';$('wtBtn').textContent='오늘 몸무게 기록';
+    renderWeight();toast('기록했어요. 아침 공복에 재면 추이가 제일 정확해요.');
+  };
   var GRASS_BG=['var(--surface2)','rgba(52,199,123,.28)','rgba(52,199,123,.55)','rgba(52,199,123,.8)','var(--zone)'];
   function renderStreak(){
     var st=runStreak();
@@ -447,7 +505,7 @@
     $('dRuns').innerHTML=prog.runs+' <small>회</small>';
     $('dZ2Tot').innerHTML=Math.round((prog.z2sec||0)/60)+' <small>분</small>';
     $('dZ2Wk').innerHTML=weeklyZ2Min()+' <small>분</small>';
-    renderRx();renderStreak();renderGrass();
+    renderRx();renderStreak();renderGrass();renderWeight();
     drawSpark($('dSpark'));
   }
   function drawSpark(host){
@@ -674,8 +732,8 @@
     }
     // 공유는 카드가 자랑거리일 때만: 5분+300m 미만은 "운동 안 함" 수준 카드라 획득 루프에 역효과
     $('sShare').style.display=(run.secTot>=300&&run.dist>=300)?'':'none';
-    prog.runs++;prog.runLog=prog.runLog||[];prog.runLog.push({t:Date.now(),durS:run.secTot,z2S:run.secZone});if(prog.runLog.length>200)prog.runLog.shift();
-    prog.z2sec=(prog.z2sec||0)+run.secZone;
+    prog.runs++;prog.runLog=prog.runLog||[];prog.runLog.push({t:Date.now(),durS:run.secTot,z2S:run.secZone,kcal:Math.round(run.kcal)});if(prog.runLog.length>200)prog.runLog.shift();
+    prog.z2sec=(prog.z2sec||0)+run.secZone;prog.kcalTotal=(prog.kcalTotal||0)+Math.round(run.kcal);   // runLog 저장값과 같은 반올림 기준(주간 합산과 누적의 정의 일치)
     prog.vo2maxHistory.push({t:Date.now(),vo2max:P.vo2max});if(prog.vo2maxHistory.length>60)prog.vo2maxHistory.shift();save();
     var _wd=weeklyRuns(), _rest=_wd>=RX_FREQ?'이번 주 목표 '+RX_FREQ+'회 달성!':'이번 주 '+_wd+'/'+RX_FREQ+'회 · 다음은 하루 이틀 뒤에.';
     var _st=runStreak(); if(_st.n>=2)_rest+=' 러닝 스트릭 '+_st.n+' 이어가는 중!';   // 스트릭 넛지(1은 노이즈라 2부터, "이어가는 중"=체인 프레이밍으로 N일연속 오독 방지)
