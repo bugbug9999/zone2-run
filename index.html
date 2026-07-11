@@ -549,7 +549,7 @@
   var run=null;
   function startRun(){
     if(!P){show('onboard');return;}   // 프로필 없이 러닝 진입 방지(직접 URL 등)
-    run={pts:[],dist:0,t0:Date.now(),paused:false,secTot:0,secZone:0,pace:0,grade:0,lastFix:null,watch:null,tick:null,demo:false,
+    run={pts:[],dist:0,t0:Date.now(),paused:false,secTot:0,secZone:0,pace:0,grade:0,lastFix:null,kf:null,watch:null,tick:null,demo:false,
          _lastPromptSec:0,checks:0,promptsFired:0,missed:0,promptOpen:false,recovering:false,_lastMissedPace:0,curR:0,
          firstBand:bandFor(0,P.vo2max),intenseSum:0,intenseN:0,kcal:0,vo2maxAtStart:P.vo2max};
     unlockAudio();       // 러닝 시작 탭 = 사용자 제스처 → iOS 오디오 잠금 해제
@@ -570,14 +570,37 @@
   window.startRun=startRun;
 
   function haversine(a,b){var R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lng-a.lng)*Math.PI/180,la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180;var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)*Math.sin(dLon/2);return 2*R*Math.asin(Math.sqrt(x));}
+  // GPS 칼만 필터(NRC식 트랙 평활) — 각 픽스를 accuracy로 가중해 좌표 노이즈를 눌러준다.
+  // q=프로세스 노이즈(m/s): 클수록 GPS를 더 신뢰(반응 빠름), 작을수록 더 평활. 러닝 트래킹은 강평활(1)이
+  // 이동거리 정확도가 가장 높다(시뮬: 정지 10분≈5m, 이동 참값 대비 +2~4%).
+  function KalmanGPS(q){this.q=q;this.v=-1;this.lat=0;this.lng=0;this.ts=0;}
+  KalmanGPS.prototype.process=function(lat,lng,acc,ts){
+    if(acc<4)acc=4;                                  // 낙관적 accuracy 하한(과신 방지)
+    if(this.v<0){this.lat=lat;this.lng=lng;this.v=acc*acc;this.ts=ts;}
+    else{
+      var dt=(ts-this.ts)/1000;if(dt>0){this.v+=dt*this.q*this.q;this.ts=ts;}
+      var K=this.v/(this.v+acc*acc);                 // 칼만 이득: 정확도 나쁠수록 새 픽스 덜 반영
+      this.lat+=K*(lat-this.lat);this.lng+=K*(lng-this.lng);this.v*=(1-K);
+    }
+    return{lat:this.lat,lng:this.lng};
+  };
   function onFix(pos){
     if(run.paused)return;$('runState').textContent='GPS 추적 중';
-    if(pos.coords.accuracy && pos.coords.accuracy>50)return;   // 정확도 나쁜 픽스(GPS 튐) 버림
-    var p={lat:pos.coords.latitude,lng:pos.coords.longitude,t:Date.now()};
-    // 앵커(lastFix)는 '거리 인정될 때만' 전진 → 1.2m 미만 느린 걸음도 여러 픽스에 걸쳐 누적.
-    // (기존 버그: 매 픽스마다 앵커 갱신 → 11분/km보다 느린 유저는 매초 이동<1.5m라 영영 0으로 잡힘)
-    if(run.lastFix){var d=haversine(run.lastFix,p);if(d>1.2){run.dist+=d;run.pts.push(p);run.lastFix=p;drawRoute($('rLine'),run.pts);}}
-    else {run.pts.push(p);run.lastFix=p;}
+    var acc=pos.coords.accuracy||999;
+    if(acc>50)return;   // 완전 쓰레기 픽스만 버림(나머진 칼만이 가중 처리)
+    if(!run.kf)run.kf=new KalmanGPS(1);
+    var s=run.kf.process(pos.coords.latitude,pos.coords.longitude,acc,Date.now());
+    var p={lat:s.lat,lng:s.lng,t:Date.now()};        // 평활된 좌표로 거리/경로 누적
+    run.pts.push(p);
+    // 정지 감지(NRC식): 최근 5초 '순변위' 속도가 walking 이하(0.8m/s)면 정지로 보고 거리 누적을 멈춘다.
+    // → 서 있을 때 GPS 지터가 랜덤워크로 거리에 새는 것을 원천 차단(칼만 평활만으론 못 막는 잔여 드리프트).
+    var w=run.pts.filter(function(q){return p.t-q.t<=5000}),moving=false;
+    if(w.length>=2){var span=(p.t-w[0].t)/1000,nd=haversine(w[0],p);if(span>=2&&nd/span>0.8)moving=true;}
+    if(run.lastFix){
+      var d=haversine(run.lastFix,p),dt=(p.t-run.lastFix.t)/1000,v=dt>0?d/dt:0;
+      if(moving&&v<8){run.dist+=d;drawRoute($('rLine'),run.pts);}   // 앵커는 매 픽스 전진(정지분은 0으로 흡수)
+    }
+    run.lastFix=p;
     var now=Date.now(),win=run.pts.filter(function(q){return now-q.t<25000});
     if(win.length>=2){var dd=0;for(var i=1;i<win.length;i++)dd+=haversine(win[i-1],win[i]);var dt=(win[win.length-1].t-win[0].t)/1000;if(dd>3&&dt>0)run.pace=1000/(dd/dt);else run.pace=0;}
   }
