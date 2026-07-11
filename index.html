@@ -37,7 +37,7 @@
   .numrow .field{flex:1;margin-top:18px}
   input[type=number],input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--hi);font-size:22px;font-weight:800;padding:11px 12px;border-radius:12px;margin-top:8px;font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none}
   input[type=number]:focus,input[type=text]:focus{outline:2px solid var(--accent);border-color:transparent}
-  input#knownPace{font-size:17px;font-weight:700}
+  input#knownPace,input#restHr{font-size:17px;font-weight:700}
   input::placeholder{color:var(--low);font-weight:600}
 
   .seg{display:flex;gap:8px;margin-top:8px}
@@ -136,7 +136,11 @@
         <span class="l">이미 편하게 뛰는 페이스 <span style="color:var(--low);font-weight:600;letter-spacing:0;text-transform:none">선택 · 모르면 비워둬</span></span>
         <input type="text" id="knownPace" placeholder="예: 7:00 (1km에 몇 분)" inputmode="numeric">
       </label>
-      <p class="note">정확할 필요 없어요. 대충 시작점만 잡고, 뛰면서 네 몸에 맞게 자동으로 맞춰집니다. 평소 편하게(대화되며) 뛰는 페이스를 알면 더 정확히 시작해요.</p>
+      <label class="field">
+        <span class="l">안정시 심박수 (bpm) <span style="color:var(--low);font-weight:600;letter-spacing:0;text-transform:none">선택 · 모르면 비워둬</span></span>
+        <input type="number" id="restHr" placeholder="예: 65 (쉴 때 분당 맥박)" min="35" max="110" inputmode="numeric">
+      </label>
+      <p class="note">정확할 필요 없어요. 대충 시작점만 잡고, 뛰면서 네 몸에 맞게 자동으로 맞춰집니다. 평소 편하게(대화되며) 뛰는 페이스나 안정시 심박을 알면 더 정확히 시작해요.</p>
     </div>
 
     <div class="dock">
@@ -148,7 +152,8 @@
   <section class="screen" id="s-dash">
     <div class="eyebrow">예상 시작 페이스</div>
     <h1 style="margin-bottom:4px">존2<span class="info-wrap"><button type="button" class="info" onclick="tip(this,event)" aria-label="존2 설명">?</button><span class="tip"><b>존2 = 가장 살이 잘 빠지는 구간</b>이에요. 편하게 대화할 수 있는 낮은 강도로 오래 뛰면, 몸이 지방을 주 연료로 태워요. 그래서 '천천히'가 핵심이에요.</span></span> 목표 페이스<br><span id="dPace" style="color:var(--zone)">-</span> <span class="u" style="font-size:20px;color:var(--mid);font-weight:700">/km</span></h1>
-    <p class="small" id="dSub" style="color:var(--zone);font-weight:700;margin-bottom:14px">느려 보여도 정상이에요. 존2는 '대화되는 속도'예요.</p>
+    <p class="small" id="dSub" style="color:var(--zone);font-weight:700;margin-bottom:4px">느려 보여도 정상이에요. 존2는 '대화되는 속도'예요.</p>
+    <p class="small" style="color:var(--mid);font-weight:700;margin-bottom:14px">존2 추정 심박 <b id="dHrV" style="color:var(--hi)">-</b> bpm</p>
 
     <div class="card">
       <div class="small muted"><b style="color:var(--hi)">존2는 원래 느립니다.</b> 엘리트 러너도 훈련의 80%를 이 강도로 뜁니다. 초보는 거의 빠르게 걷듯이 뛰어요. 이건 <b style="color:var(--hi)">추정 시작점</b>이라, 첫 러닝에서 "말 되냐?" 몇 번 물어 <b style="color:var(--hi)">네 진짜 존2 페이스</b>를 찾아요. 뛸수록 정확해져요.</div>
@@ -213,7 +218,7 @@
       <div class="stat"><div class="k">이번 주 존2</div><div class="v" id="dZ2Wk">0 <small>분</small></div></div>
     </div>
 
-    <p class="note">심박 숫자는 안 보여줍니다. 대신 뛰면서 지킬 수 있는 <b>페이스</b>와 "말 되냐?" 체크로 존2를 안내해요. 달릴 땐 폰을 손에 들거나 팔에 차면 "말 체크"를 놓치지 않아요. 의료·진단 목적이 아닙니다.</p>
+    <p class="note">심박은 실측이 아니라 페이스로 계산한 <b>추정치</b>라 항상 범위로 보여줘요. 진짜 기준은 뛰면서 지킬 수 있는 <b>페이스</b>와 "말 되냐?" 체크. 달릴 땐 폰을 손에 들거나 팔에 차면 "말 체크"를 놓치지 않아요. 의료·진단 목적이 아닙니다.</p>
 
     <div class="dock">
       <button class="btn" onclick="startRun()">러닝 시작</button>
@@ -230,6 +235,7 @@
       <div class="k">목표 존2<span class="info-wrap"><button type="button" class="info" onclick="tip(this,event)" aria-label="존2 설명">?</button><span class="tip" style="left:50%;transform:translateX(-50%)"><b>존2 = 가장 살이 잘 빠지는 구간</b>이에요. 편하게 대화되는 낮은 강도로 오래 뛰면 지방을 주 연료로 태워요. '천천히'가 핵심.</span></span> 페이스</div>
       <div class="big" style="font-size:40px"><span id="rBand">-</span> <span class="u">/km</span></div>
       <div class="small muted" style="margin-top:6px">현재 <b id="rPace" style="color:var(--hi)">-:--</b> /km</div>
+      <div class="small muted" style="margin-top:4px">추정 심박 <b id="rHr" style="color:var(--hi)">-</b> bpm</div>
     </div>
 
     <div class="gauge">
@@ -353,6 +359,18 @@
   // target %VO2R -> pace(sec/km) at grade
   function paceForR(r,gPct,vo2max){var vo2=VO2REST+r*(vo2max-VO2REST);var g=gradeEff(gPct/100);var spd=(vo2-VO2REST)/(0.2+0.9*g);if(spd<=0)return 0;return (1000/spd)*60;}
   function bandFor(gPct,vo2max){return {fast:paceForR(ZHI,gPct,vo2max), slow:paceForR(ZLO,gPct,vo2max)};}
+  // ---------- 심박 추정(표시 전용 — 교정 엔진은 %VO2R만 쓰고 여기 값은 절대 안 씀) ----------
+  // 최대심박 = Tanaka(2001) 208-0.7×나이. 안정시심박 = 온보딩 입력값 우선, 없으면 Uth-Sørensen 역산(15×HRmax/VO2max, VO2max 교정을 따라 함께 갱신).
+  // 현재/목표 심박 = %HRR≈%VO2R 등가(ACSM). 실측이 아니므로 반드시 범위+"추정" 라벨로만 노출(단일 숫자 단정 금지).
+  function hrMax(){return 208-0.7*P.age;}
+  function hrRest(){var m=hrMax();
+    // 저장값 검증(온보딩 입력클램프 35~110과 동일 계약 + HRmax-30 sanity) — localStorage 직접 손상·구버전 주입 대비. UI 경로로는 도달 불가.
+    if(P.restHr&&isFinite(P.restHr)&&P.restHr>=35&&P.restHr<=Math.min(110,m-30))return P.restHr;
+    return Math.max(45,Math.min(90,15*m/P.vo2max));}
+  function hrForR(r){if(!isFinite(r))r=0;var rest=hrRest(),m=hrMax();return Math.round(Math.max(rest,Math.min(m,rest+Math.max(0,Math.min(1,r))*(m-rest))));}
+  var HR_ERR=8;   // 표시 오차폭(±bpm) — v1 폐기 근거였던 안정시심박 ±8 전파를 숨기지 않고 그대로 범위로 노출
+  function fmtHrEst(r){var h=hrForR(r),m=Math.round(hrMax()),rest=Math.round(hrRest());
+    return h+' ('+Math.max(rest,h-HR_ERR)+'~'+Math.min(m,h+HR_ERR)+')';}
   // 게이밍 방어: 자기신고가 생리학을 못 이기게. 헐떡=빠르게 하향(안전), 편함=천천히 상향
   function implausibleEasy(paceS,gPct,cur){var spd=1000/(paceS/60),g=gradeEff(gPct/100),vo2P=0.2*spd+0.9*spd*g+VO2REST;return (vo2P-VO2REST)/(cur-VO2REST)>0.82;}
   function seekVo2(cur,paceS,gPct,resp){
@@ -391,7 +409,10 @@
     var sp={age:+$('age').value, sex:sex, heightCm:+$('height').value||165, weightKg:+$('weight').value||60, par:+$('par').value};
     var kp=parsePace($('knownPace').value);
     var v = kp ? seedFromPace(kp) : coldVo2max(sp);   // 아는 페이스 있으면 그걸로 시드(콜드편향 교정)
-    P={age:sp.age,sex:sp.sex,heightCm:sp.heightCm,weightKg:sp.weightKg,par:sp.par,vo2max0:v,vo2max:v,createdAt:Date.now()};
+    var rh=parseFloat($('restHr').value);
+    P={age:sp.age,sex:sp.sex,heightCm:sp.heightCm,weightKg:sp.weightKg,par:sp.par,vo2max0:v,vo2max:v,
+       restHr:(isFinite(rh)&&rh>=35&&rh<=110)?Math.round(rh):null,   // 범위 밖/미입력은 null → Uth 역산 폴백
+       createdAt:Date.now()};
     if(!prog.vo2maxHistory.length)prog.vo2maxHistory.push({t:Date.now(),vo2max:v});
     if(!(prog.weightLog||[]).length)logWeight(sp.weightKg);   // 최초 온보딩만 시드 — 재온보딩이 당일 수동 기록을 덮지 않게
     save();renderDash();show('dash');
@@ -530,6 +551,7 @@
     $('dPace').textContent=fmtBand(b);
     $('dSub').textContent = b.slow>WALK ? '이 페이스는 빠르게 걷기부터 시작해도 좋아요. 존2는 속도가 아니라 강도예요.'
                                         : "느려 보여도 정상이에요. 존2는 '대화되는 속도'예요.";
+    $('dHrV').textContent=hrForR(ZLO)+'~'+hrForR(ZHI);
     $('dVo2').innerHTML=Math.round(P.vo2max)+' <small>ml/kg/min</small>';
     $('dRuns').innerHTML=prog.runs+' <small>회</small>';
     $('dZ2Tot').innerHTML=Math.round((prog.z2sec||0)/60)+' <small>분</small>';
@@ -554,7 +576,7 @@
          firstBand:bandFor(0,P.vo2max),intenseSum:0,intenseN:0,kcal:0,vo2maxAtStart:P.vo2max};
     unlockAudio();       // 러닝 시작 탭 = 사용자 제스처 → iOS 오디오 잠금 해제
     resetPromptText();
-    show('run');$('rPause').textContent='일시정지';$('rCal').textContent=0;$('rPct').textContent=0;$('rDist').textContent='0.00';$('rTime').textContent='0:00';$('rLine').setAttribute('points','');
+    show('run');$('rPause').textContent='일시정지';$('rCal').textContent=0;$('rPct').textContent=0;$('rDist').textContent='0.00';$('rTime').textContent='0:00';$('rHr').textContent='-';$('rLine').setAttribute('points','');
     updateBandUI();
     var walk=bandFor(0,P.vo2max).slow>WALK;           // 초저체력: 러닝 화면에서도 "걷기 수준" 안심 카피
     $('rHint').style.display=walk?'block':'none';
@@ -638,6 +660,7 @@
   }
   function renderRun(){
     $('rPace').textContent=run.pace?fmtPace(run.pace):'-:--';
+    $('rHr').textContent=run.pace?fmtHrEst(run.curR):'-';
     $('rDist').textContent=(run.dist/1000).toFixed(2);
     $('rTime').textContent=fmtClock(run.secTot);
     $('rPct').textContent=run.secTot?Math.round(run.secZone/run.secTot*100):0;
@@ -871,6 +894,7 @@
   // init
   load();
   if(P){ $('age').value=P.age;$('ageV').textContent=P.age;$('height').value=P.heightCm;$('weight').value=P.weightKg;$('par').value=P.par;$('parV').textContent=PAR_LBL[P.par];
+    if(P.restHr)$('restHr').value=P.restHr;
     $('sexSeg').querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.sex===P.sex);});
     renderDash();show('dash'); }
 })();
